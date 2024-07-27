@@ -20,9 +20,8 @@ pub async fn get_driver(
     browser: &str,
 ) -> Result<thirtyfour::WebDriver, &'static str> {
     let capabilities = select_browser(browser)?;
-    Ok(thirtyfour::WebDriver::new(address, capabilities)
-        .await
-        .unwrap())
+    thirtyfour::WebDriver::new(address, capabilities)
+        .await.map_err(|_|"连接WebDriver错误，请检查参数是否正确或对应的WebDriver是否已开启")
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]

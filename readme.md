@@ -14,3 +14,16 @@
 ```shell
 ./shuba -l https://69shuba.cx/txt/46869/31308058
 ```
+
+选择浏览器进行抓取（需要安装并运行**WebDriver**）
+
+```shell
+./shuba -l https://69shuba.cx/book/46869/ -b safari
+```
+
+使用`-a`可链接远程WebDriver主机进行数据抓取<br/>
+
+这里在ip为`10.0.0.1`的主机上使用edge进行数据抓取。
+```shell
+./shuba -a http://10.0.0.1:9515 -l https://69shuba.cx/book/46869/ -b edge
+```
