@@ -13,7 +13,6 @@ impl crate::traits::ParseWith for Chapters {
     async fn parse_with(driver: &'_ WebDriver) -> Result<Self::Output, Box<dyn Error + Send>> {
         let mut builder = crate::model::ChaptersBuilder::default();
         let script = driver.find_all(By::Tag("head > script"));
-        // let title = driver.find(By::XPath("/html/body/div[2]/div[1]/h3/div/a[3]"));
         let title = driver.find(By::XPath("/html/body/div[2]/div[1]/div[3]/h1"));
         let chapter_title = driver.find(By::XPath("/html/body/div[2]/div[1]/div[3]/h1"));
         let p = driver.find_all(By::Tag("p"));
