@@ -27,5 +27,5 @@ jobs:
       with:
         name: shuba-download-${{ runner.os }}
         path: |
-          ./target/release/shuba
+          ./target/release/shuba*
         retention-days: 30
