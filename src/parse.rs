@@ -1,3 +1,4 @@
+use crate::traits::ParseWith;
 use thirtyfour::{Capabilities, DesiredCapabilities};
 
 ///从字符串中选择用来抓取的浏览器
@@ -21,7 +22,8 @@ pub async fn get_driver(
 ) -> Result<thirtyfour::WebDriver, &'static str> {
     let capabilities = select_browser(browser)?;
     thirtyfour::WebDriver::new(address, capabilities)
-        .await.map_err(|_|"连接WebDriver错误，请检查参数是否正确或对应的WebDriver是否已开启")
+        .await
+        .map_err(|_| "连接WebDriver错误，请检查参数是否正确或对应的WebDriver是否已开启")
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -47,12 +49,69 @@ impl std::convert::TryFrom<&str> for DownloadMode {
             )),
             //https://69shuba.cx/book/9958171/
             4 => Ok(DownloadMode::Directory(
-                value.replace("txt", "book").replace(".htm","").to_string(),
+                value.replace("txt", "book").replace(".htm", "").to_string(),
             )),
-            _ => Err("parse url error please check out your url"),
+            _ => Err("parse url error, please check out your url."),
         }
     }
 }
+
+impl DownloadMode {
+    pub async fn run(
+        &self,
+        address: &str,
+        browser: &str,
+        download_path: &std::path::Path,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let driver = match self {
+            DownloadMode::Chapter(link) => {
+                let driver = crate::parse::get_driver(address, browser).await?;
+                driver.goto(link).await.ok();
+                let chapter = crate::model::Chapters::parse_with(&driver)
+                    .await
+                    .unwrap()
+                    .unwrap();
+                let mut f = std::fs::File::create(
+                    download_path.join(format!("{}.txt", chapter.chapters_name)),
+                )?;
+                use std::io::Write;
+                println!("开始下载");
+                println!("正在下载: {}", chapter.chapters_name);
+
+                f.write_all(chapter.to_string().as_bytes())?;
+                driver
+            }
+            DownloadMode::Directory(link) => {
+                let driver = crate::parse::get_driver(address, browser).await?;
+                driver.goto(link).await.ok();
+                let directory = crate::model::Directory::parse_with(&driver).await.unwrap();
+                println!("解析完成，需要下载{}章", directory.inner_data.len());
+                println!("开始下载");
+                let mut f = std::fs::File::create(
+                    download_path.join(format!("{}.txt", directory.book_name)),
+                )?;
+
+                for chapters_link in directory.inner_data {
+                    let title = chapters_link.title;
+                    let href = chapters_link.href;
+                    driver.goto(href).await.ok();
+                    use std::io::Write;
+
+                    println!("正在下载章节: {}", title);
+                    let chapter = crate::model::Chapters::parse_with(&driver)
+                        .await
+                        .unwrap()
+                        .unwrap();
+                    f.write_all(chapter.to_string().as_bytes())?;
+                }
+                driver
+            }
+        };
+        driver.quit().await.ok();
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

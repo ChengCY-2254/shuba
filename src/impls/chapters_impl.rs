@@ -1,5 +1,6 @@
-use std::error::Error;
 use async_trait::async_trait;
+use std::error::Error;
+use std::fmt::Formatter;
 
 use thirtyfour::{By, WebDriver};
 use tokio::join;
@@ -17,7 +18,9 @@ impl crate::traits::ParseWith for Chapters {
         let chapter_title = driver.find(By::XPath("/html/body/div[2]/div[1]/div[3]/h1"));
         let p = driver.find_all(By::Tag("p"));
 
-        if let (Ok(_script), Ok(_title),Ok(chapter_title), Ok(p)) = join!(script, title, chapter_title,p) {
+        if let (Ok(_script), Ok(_title), Ok(chapter_title), Ok(p)) =
+            join!(script, title, chapter_title, p)
+        {
             {
                 let mut chapters_content: String = String::new();
                 for p in p {
@@ -54,6 +57,19 @@ impl crate::traits::ParseWith for Chapters {
     }
 }
 
+impl std::fmt::Display for Chapters {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.chapters_name)?;
+        write!(
+            f,
+            "\n{}",
+            self.chapters_content
+                .replace("Copyright 2024 69shuba.cx", "")
+        )?;
+        write!(f,"\n\n")?;
+        Ok(())
+    }
+}
 // fn parse_page(data: &str) -> (Option<String>, Option<String>) {
 //     let mut a = None;
 //     let mut b = None;
