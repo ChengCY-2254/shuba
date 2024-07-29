@@ -82,11 +82,19 @@ impl DownloadMode {
                 driver
             }
             DownloadMode::Directory(link) => {
+                let sty = indicatif::ProgressStyle::with_template("{msg} {wide_bar} {pos}/{len} ")
+                    .unwrap()
+                    .progress_chars("##-");
                 let driver = crate::parse::get_driver(address, browser).await?;
                 driver.goto(link).await.ok();
+                println!("开始解析");
                 let directory = crate::model::Directory::parse_with(&driver).await.unwrap();
                 println!("解析完成，需要下载{}章", directory.inner_data.len());
-                println!("开始下载");
+
+                let pb = indicatif::ProgressBar::new(directory.inner_data.len() as u64);
+                pb.set_style(sty);
+                pb.set_message("开始下载");
+                // println!("开始下载");
                 let mut f = std::fs::File::create(
                     download_path.join(format!("{}.txt", directory.book_name)),
                 )?;
@@ -97,13 +105,16 @@ impl DownloadMode {
                     driver.goto(href).await.ok();
                     use std::io::Write;
 
-                    println!("正在下载章节: {}", title);
+                    // println!("正在下载章节: {}", title);
+                    pb.set_message(title);
                     let chapter = crate::model::Chapters::parse_with(&driver)
                         .await
                         .unwrap()
                         .unwrap();
                     f.write_all(chapter.to_string().as_bytes())?;
+                    pb.inc(1);
                 }
+                pb.finish_with_message("dene");
                 driver
             }
         };
