@@ -36,3 +36,10 @@
 ```shell
 ./shuba -a http://10.0.0.1:9515 -l https://69shuba.cx/book/46869/ -b edge -c
 ```
+
+## Future
+- [ ] 支持浏览器代理
+- [x] 下载章节
+- [x] 下载全本
+- [x] 远程连接WebDriver进行抓取
+- [x] 更多的浏览器支持
