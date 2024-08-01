@@ -4,6 +4,10 @@
 
 如需此项目进行抓取，需要启动[WebDriver](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/)并默认监听在9515端口
 
+**由于有些代理软件会妨碍对WebDriver的连接，一定不要放弃，请多尝试一下其它的代理软件，或者探索你所使用的代理软件功能，我本人没遇到过这个问题，也没有第二个设备来调试，多折腾折腾代理软件吧（开个全局代理之类的？）**
+
+研究中，目前没什么办法，有办法也测试不了。
+
 从目录页下载
 ```shell
 ./shuba -l https://69shuba.cx/book/46869/
@@ -32,3 +36,6 @@
 ```shell
 ./shuba -a http://10.0.0.1:9515 -l https://69shuba.cx/book/46869/ -b edge -c
 ```
+
+## Future
+- [ ] 浏览器代理（~~研究中，文档稀烂，有无作用都不知道~~）
