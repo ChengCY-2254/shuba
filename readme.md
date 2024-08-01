@@ -1,4 +1,5 @@
 # 69shuba-download
+[![Rust](https://github.com/ChengCY-2254/shuba/actions/workflows/rust.yml/badge.svg)](https://github.com/ChengCY-2254/shuba/actions/workflows/rust.yml)
 
 从69书吧网下载书籍，使用[edge WebDriver](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/)进行内容抓取。
 
