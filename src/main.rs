@@ -1,4 +1,3 @@
-
 mod impls;
 mod model;
 mod parse;
@@ -10,6 +9,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let address = matches.get_one::<String>("address").unwrap();
     let browser = matches.get_one::<String>("browser").unwrap();
     let url = matches.get_one::<String>("url").unwrap();
+    let check_proxy = matches.get_flag("check_proxy");
 
     let download_mode = parse::DownloadMode::try_from(url.as_str()).unwrap();
 
@@ -19,7 +19,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     //统计运行时间
     let start = std::time::Instant::now();
-    download_mode.run(address, browser, &downloads).await?;
+    download_mode.run(address, browser, &downloads,check_proxy).await?;
     println!("下载完成，用时: {:?}", start.elapsed());
     Ok(())
 }
@@ -57,5 +57,12 @@ fn cli() -> clap::Command {
                 .long("url")
                 .value_name("url")
                 .help("需要抓取的地址"),
+        )
+        .arg(
+            clap::Arg::new("check_proxy")
+                .required(false)
+                .short('c')
+                .action(clap::ArgAction::SetFalse)
+                .help("是否跳过代理检查"),
         )
 }

@@ -27,3 +27,8 @@
 ```shell
 ./shuba -a http://10.0.0.1:9515 -l https://69shuba.cx/book/46869/ -b edge
 ```
+
+由于69shuba屏蔽了中国大陆的ip所以添加了代理检查，如果不想检查则可以添加`-c`参数以跳过检查。
+```shell
+./shuba -a http://10.0.0.1:9515 -l https://69shuba.cx/book/46869/ -b edge -c
+```
