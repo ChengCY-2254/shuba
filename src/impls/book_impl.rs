@@ -1,9 +1,7 @@
 use std::error::Error;
-use async_trait::async_trait;
 use thirtyfour::{By, WebDriver};
 use crate::model::Book;
 
-#[async_trait]
 impl crate::traits::ParseWith for Book {
     type Output = Book;
 

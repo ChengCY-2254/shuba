@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use std::error::Error;
 use std::fmt::Formatter;
 
@@ -7,7 +6,6 @@ use tokio::join;
 
 use crate::model::Chapters;
 
-#[async_trait]
 impl crate::traits::ParseWith for Chapters {
     type Output = Option<Chapters>;
 
