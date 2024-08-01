@@ -36,6 +36,3 @@
 ```shell
 ./shuba -a http://10.0.0.1:9515 -l https://69shuba.cx/book/46869/ -b edge -c
 ```
-
-## Future
-- [ ] 浏览器代理（~~研究中，文档稀烂，有无作用都不知道~~）
