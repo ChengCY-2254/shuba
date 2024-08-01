@@ -1,5 +1,5 @@
 use crate::traits::ParseWith;
-use thirtyfour::{Capabilities, DesiredCapabilities};
+use thirtyfour::{By, Capabilities, DesiredCapabilities};
 
 ///从字符串中选择用来抓取的浏览器
 #[inline]
@@ -19,11 +19,17 @@ fn select_browser(text: &str) -> Result<Capabilities, &'static str> {
 pub async fn get_driver(
     address: &str,
     browser: &str,
-) -> Result<thirtyfour::WebDriver, &'static str> {
+) -> Result<thirtyfour::WebDriver, Box<dyn std::error::Error>> {
     let capabilities = select_browser(browser)?;
     thirtyfour::WebDriver::new(address, capabilities)
         .await
-        .map_err(|_| "连接WebDriver错误，请检查参数是否正确或对应的WebDriver是否已开启")
+        .map_err(|e| {
+            format!(
+                "连接WebDriver错误，请检查参数是否正确或对应的WebDriver是否已开启\r\n{}",
+                e
+            )
+            .into()
+        })
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -62,10 +68,16 @@ impl DownloadMode {
         address: &str,
         browser: &str,
         download_path: &std::path::Path,
+        check_proxy: bool,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        let driver = match self {
+        let mode = self;
+        let driver = if check_proxy {
+            self.check_connected(address, browser).await?
+        } else {
+            crate::parse::get_driver(address, browser).await?
+        };
+        let driver = match mode {
             DownloadMode::Chapter(link) => {
-                let driver = crate::parse::get_driver(address, browser).await?;
                 driver.goto(link).await.ok();
                 let chapter = crate::model::Chapters::parse_with(&driver)
                     .await
@@ -85,7 +97,6 @@ impl DownloadMode {
                 let sty = indicatif::ProgressStyle::with_template("{msg} {wide_bar} {pos}/{len} ")
                     .unwrap()
                     .progress_chars("##-");
-                let driver = crate::parse::get_driver(address, browser).await?;
                 driver.goto(link).await.ok();
                 println!("开始解析");
                 let directory = crate::model::Directory::parse_with(&driver).await.unwrap();
@@ -94,7 +105,6 @@ impl DownloadMode {
                 let pb = indicatif::ProgressBar::new(directory.inner_data.len() as u64);
                 pb.set_style(sty);
                 pb.set_message("开始下载");
-                // println!("开始下载");
                 let mut f = std::fs::File::create(
                     download_path.join(format!("{}.txt", directory.book_name)),
                 )?;
@@ -120,6 +130,22 @@ impl DownloadMode {
         };
         driver.quit().await.ok();
         Ok(())
+    }
+    ///用于检查连接是否建立并返回一个driver对象，因为69shuba屏蔽了国内ip，所以需要使用代理
+    pub async fn check_connected(
+        &self,
+        address: &str,
+        browser: &str,
+    ) -> Result<thirtyfour::WebDriver, Box<dyn std::error::Error>> {
+        let driver = crate::parse::get_driver(address, browser).await?;
+        println!("检查是否连接代理");
+        driver.goto("https://www.google.com").await.ok();
+        driver
+            .find(By::Name("q"))
+            .await
+            .expect("未连接到代理，请连接到代理后再试");
+        println!("已连接");
+        Ok(driver)
     }
 }
 
