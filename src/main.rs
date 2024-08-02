@@ -7,9 +7,11 @@ mod traits;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = cli().get_matches();
     let address = matches.get_one::<String>("address").unwrap();
-    let browser = matches.get_one::<String>("browser").unwrap();
     let url = matches.get_one::<String>("url").unwrap();
     let check_proxy = matches.get_flag("check_proxy");
+    let proxy_str: Option<&str> = matches
+        .get_one::<String>("proxy_address")
+        .map(String::as_ref);
 
     let download_mode = parse::DownloadMode::try_from(url.as_str()).unwrap();
 
@@ -19,7 +21,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     //统计运行时间
     let start = std::time::Instant::now();
-    download_mode.run(address, browser, &downloads,check_proxy).await?;
+    download_mode
+        .run(address, &downloads, check_proxy, proxy_str)
+        .await
+        .map_err(|e| format!("下载时出现错误 {:?}", e))?;
     println!("下载完成，用时: {:?}", start.elapsed());
     Ok(())
 }
@@ -40,16 +45,16 @@ fn cli() -> clap::Command {
                 .required(false)
                 .default_value("http://localhost:9515"),
         )
-        .arg(
-            //选择浏览器
-            clap::Arg::new("browser")
-                .short('b')
-                .help("使用的选择使用的浏览器")
-                .value_parser([
-                    "chrome", "chromium", "edge", "firefox", "ie", "opera", "safari",
-                ])
-                .default_value("edge"),
-        )
+        // .arg(
+        //     //选择浏览器
+        //     clap::Arg::new("browser")
+        //         .short('b')
+        //         .help("使用的选择使用的浏览器")
+        //         .value_parser([
+        //             "chrome", "chromium", "edge", "firefox", "ie", "opera", "safari",
+        //         ])
+        //         .default_value("edge"),
+        // )
         .arg(
             clap::Arg::new("url")
                 .required(true)
@@ -64,5 +69,13 @@ fn cli() -> clap::Command {
                 .short('c')
                 .action(clap::ArgAction::SetFalse)
                 .help("是否跳过代理检查"),
+        )
+        .arg(
+            clap::Arg::new("proxy_address")
+                .required(false)
+                .long("proxy")
+                // .help("让浏览器通过代理进行网页访问，建议使用socks5代理，如果使用http/https代理，请使用;将两个url分割开来")
+                .help("让浏览器通过代理进行网页访问，使用socks5代理")
+                .value_name("proxy_address"),
         )
 }

@@ -1,20 +1,22 @@
 use std::error::Error;
 use std::fmt::Formatter;
-
-use thirtyfour::{By, WebDriver};
 use tokio::join;
 
 use crate::model::Chapters;
+use crate::traits::{By, Driver};
 
 impl crate::traits::ParseWith for Chapters {
     type Output = Option<Chapters>;
+    type Error = Box<dyn std::error::Error + Send>;
 
-    async fn parse_with(driver: &'_ WebDriver) -> Result<Self::Output, Box<dyn Error + Send>> {
+    async fn parse_with(driver: &'_ Driver) -> Result<Self::Output, Box<dyn Error + Send>> {
         let mut builder = crate::model::ChaptersBuilder::default();
-        let script = driver.find_all(By::Tag("head > script"));
+        let script = driver.find_all(By::XPath("/html/head/script[2]"));
+        // let script = driver.find_all(By::Tag("head > script"));
         let title = driver.find(By::XPath("/html/body/div[2]/div[1]/div[3]/h1"));
         let chapter_title = driver.find(By::XPath("/html/body/div[2]/div[1]/div[3]/h1"));
-        let p = driver.find_all(By::Tag("p"));
+        //https://github.com/jonhoo/fantoccini/issues/119
+        let p = driver.find_all(By::Css("p"));
 
         if let (Ok(_script), Ok(_title), Ok(chapter_title), Ok(p)) =
             join!(script, title, chapter_title, p)
@@ -64,7 +66,7 @@ impl std::fmt::Display for Chapters {
             self.chapters_content
                 .replace("Copyright 2024 69shuba.cx", "")
         )?;
-        write!(f,"\n\n")?;
+        write!(f, "\n\n")?;
         Ok(())
     }
 }

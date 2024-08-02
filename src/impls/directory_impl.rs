@@ -1,24 +1,30 @@
-use crate::model::{ChapterLink, Directory};
 use std::error::Error;
-use thirtyfour::prelude::ElementQueryable;
-use thirtyfour::{By, WebDriver, WebElement};
+
+
+use crate::model::{ChapterLink, Directory};
+use crate::traits::{By, Driver};
 
 impl crate::traits::ParseWith for Directory {
-    
     type Output = Self;
+    type Error = Box<dyn std::error::Error>;
 
-    async fn parse_with(driver: &'_ WebDriver) -> Result<Self::Output, Box<dyn Error + Send>> {
-        let div = driver.query(By::Id("catalog")).first().await;
-        let ul = div.unwrap().find_all(By::Tag("ul > li")).await.unwrap();
+    async fn parse_with(driver: &'_ Driver) -> Result<Self::Output, Box<dyn Error>> {
+        let ul = driver
+            .find_all(By::XPath("/html/body/div[3]/div/div[2]/ul/li"))
+            .await
+            .map_err(|e| format!("Failed to find li element : {}", e))?;
         let book_name = driver
             .find(By::XPath("/html/body/div[3]/div/h3/div[1]/a[3]"))
             .await
-            .unwrap();
+            .map_err(|e| format!("Failed to find book name : {}", e))?;
         let book_name = book_name.text().await.unwrap_or_default();
         let mut inner_data = {
             let mut data = vec![];
             for li in ul {
-                data.push(Self::parse_li(li).await)
+                let li_link = Self::parse_li(li)
+                    .await
+                    .map_err(|e| format!("Failed to parse li: {}", e))?;
+                data.push(li_link);
             }
             data
         };
@@ -32,17 +38,16 @@ impl crate::traits::ParseWith for Directory {
 }
 
 impl Directory {
-    async fn parse_li(li: WebElement) -> ChapterLink {
+    async fn parse_li(li: fantoccini::elements::Element) -> Result<ChapterLink, Box<dyn Error>> {
         let id: usize = li
             .attr("data-num")
-            .await
-            .unwrap()
+            .await?
             .unwrap_or_default()
             .parse()
             .unwrap_or_default();
-        let a = li.find(By::Tag("a")).await.unwrap();
-        let href = a.attr("href").await.unwrap().unwrap_or_default();
+        let a = li.find(By::Css("a")).await?;
+        let href = a.attr("href").await?.unwrap_or_default();
         let title = a.text().await.unwrap_or_default();
-        ChapterLink { id, href, title }
+        Ok(ChapterLink { id, href, title })
     }
 }

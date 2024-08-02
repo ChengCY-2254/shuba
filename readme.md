@@ -20,12 +20,6 @@
 ./shuba -l https://69shuba.cx/txt/46869/31308058
 ```
 
-选择浏览器进行抓取（需要安装并运行**WebDriver**）
-
-```shell
-./shuba -l https://69shuba.cx/book/46869/ -b safari
-```
-
 使用`-a`可链接远程WebDriver主机进行数据抓取<br/>
 
 这里在ip为`10.0.0.1`的主机上使用edge进行数据抓取。
@@ -43,4 +37,3 @@
 - [x] 下载章节
 - [x] 下载全本
 - [x] 远程连接WebDriver进行抓取
-- [x] 更多的浏览器支持
