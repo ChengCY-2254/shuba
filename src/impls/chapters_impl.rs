@@ -31,26 +31,8 @@ impl crate::traits::ParseWith for Chapters {
                 builder.chapters_content(chapters_content);
             }
             {
-                // let chapters_name = title.text().await.unwrap_or_default();
-                // builder.book_name(chapters_name);
-            }
-            {
                 let chapters_name = chapter_title.text().await.unwrap_or_default();
                 builder.chapters_name(chapters_name);
-            }
-            {
-                // if !script.is_empty() {
-                //     let script = &script[1];
-                //     let script = script.text().await.unwrap_or_default();
-                //     println!("{script}");
-                //     let start = script.find('{').unwrap();
-                //     let end = script.find('}').unwrap();
-                //     let json: &str = script[start + 1..end].as_ref();
-                //     let (a, b) = parse_page(json);
-                //     builder.prev_page(a).next_page(b);
-                // } else {
-                //     return Ok(None);
-                // }
             }
         }
         Ok(Some(builder.build().unwrap()))
@@ -70,29 +52,3 @@ impl std::fmt::Display for Chapters {
         Ok(())
     }
 }
-// fn parse_page(data: &str) -> (Option<String>, Option<String>) {
-//     let mut a = None;
-//     let mut b = None;
-//     data.lines().for_each(|line| {
-//         let line = line.trim();
-//         if line.contains("preview_page") {
-//             let start = "preview_page".len() + 1;
-//             let end = line.len() - 1;
-//             a = Some(
-//                 line[start..end]
-//                     .trim_matches(|c| c == '"' || c == ' ')
-//                     .to_string(),
-//             );
-//         }
-//         if line.contains("next_page") {
-//             let start = "next_page".len() + 1;
-//             let end = line.len() - 1;
-//             b = Some(
-//                 line[start..end]
-//                     .trim_matches(|c| c == '"' || c == ' ')
-//                     .to_string(),
-//             );
-//         }
-//     });
-//     (a, b)
-// }

@@ -2,61 +2,27 @@ use crate::traits::{By, ParseWith};
 use fantoccini::wd::Capabilities;
 use serde_json::json;
 
-///从字符串中选择用来抓取的浏览器
-// #[inline]
-// fn select_browser(text: &str) -> Result<fantoccini::Client, &'static str> {
-//     match text.to_lowercase().as_str() {
-//         "chrome" => Ok(DesiredCapabilities::chrome().into()),
-//         "chromium" => Ok(DesiredCapabilities::chromium().into()),
-//         "edge" => Ok(DesiredCapabilities::edge().into()),
-//         "firefox" => Ok(DesiredCapabilities::firefox().into()),
-//         "safari" => Ok(DesiredCapabilities::safari().into()),
-//         "opera" => Ok(DesiredCapabilities::opera().into()),
-//         "ie" => Ok(DesiredCapabilities::internet_explorer().into()),
-//         _ => Err("missing browser"),
-//     }
-// }
+
 ///解析代理字符串
 /// export https_proxy=http://127.0.0.1:8888;export http_proxy=http://127.0.0.1:8888;export all_proxy=socks5://127.0.0.1:8889
-fn parse_proxy_caps<'a>(
+fn parse_proxy_caps(
     caps: &mut Capabilities,
-    proxy_str: Option<&'a str>,
+    proxy_str: Option<&str>,
 ) -> Result<(), &'static str> {
     if let Some(proxy_str) = proxy_str {
-        //判断是否是http/https代理
-        // if proxy_str.find(';').is_some() {
-        //     let mut http_proxy =
-        //         proxy_str
-        //             .split(';')
-        //             .fold(std::collections::HashMap::new(), |mut map, url| {
-        //                 if url.starts_with("http://") {
-        //                     map.insert("httpProxy".to_string(), url.to_string());
-        //                 } else if url.starts_with("https://") {
-        //                     map.insert("sslProxy".to_string(), url.to_string());
-        //                 }
-        //                 map
-        //             });
-        //     http_proxy.insert("proxyType".into(), "manual".into());
-        // } else {
         //socks5代理
-        let proxy_obj = if proxy_str.starts_with("socks://") {
+        let proxy_obj = if proxy_str.starts_with("socks5://") {
+            let proxy_str = proxy_str.replace("socks5://","");
             json!({
                 "proxyType": "manual",
                 "socksProxy": proxy_str,
-                // "socksVersion":5
-            })
-        } else if proxy_str.starts_with("socks5://") {
-            json!({
-                "proxyType": "manual",
-                "socksProxy": proxy_str,
-                // "socksVersion":5
+                "socksVersion":5
             })
         } else {
             eprintln!("不是一个有效的socks5代理字符串，请检查你的配置");
             std::process::exit(1);
         };
         caps.insert("proxy".to_string(), proxy_obj);
-        // }
     }
     Ok(())
 }
