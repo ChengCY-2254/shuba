@@ -1,5 +1,5 @@
 use crate::traits::{By, ParseWith};
-use fantoccini::wd::Capabilities;
+use fantoccini::wd::{Capabilities};
 use serde_json::json;
 
 

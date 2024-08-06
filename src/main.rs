@@ -45,16 +45,7 @@ fn cli() -> clap::Command {
                 .required(false)
                 .default_value("http://localhost:9515"),
         )
-        // .arg(
-        //     //选择浏览器
-        //     clap::Arg::new("browser")
-        //         .short('b')
-        //         .help("使用的选择使用的浏览器")
-        //         .value_parser([
-        //             "chrome", "chromium", "edge", "firefox", "ie", "opera", "safari",
-        //         ])
-        //         .default_value("edge"),
-        // )
+       
         .arg(
             clap::Arg::new("url")
                 .required(true)
@@ -74,7 +65,6 @@ fn cli() -> clap::Command {
             clap::Arg::new("proxy_address")
                 .required(false)
                 .long("proxy")
-                // .help("让浏览器通过代理进行网页访问，建议使用socks5代理，如果使用http/https代理，请使用;将两个url分割开来")
                 .help("让浏览器通过代理进行网页访问，使用socks5代理")
                 .value_name("proxy_address"),
         )

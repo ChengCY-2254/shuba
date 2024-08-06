@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tokio = { version = "1.39.1",features = ["io-util","rt","macros"] }
+tokio = { version = "1.39.1", features = ["io-util", "rt", "macros"] }
 derive_builder = "0.20.0"
 #thirtyfour = { version = "0.33.0" }
 futures = "0.3.30"
