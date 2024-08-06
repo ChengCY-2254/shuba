@@ -1,4 +1,5 @@
 mod handler;
+mod handlers;
 mod impls;
 mod model;
 mod parse;
@@ -14,7 +15,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map(String::as_ref);
     let download_path:Option<&String> = matches.get_one("download_path");
 
-    let handler = handler::Handler::try_from(url.as_str())?;
+    let handler = handler::Handlers::try_from(url.as_str())?;
     let download_mode = parse::DownloadMode::try_from(url.as_str()).unwrap();
 
     let downloads = parse::parse_download_path(download_path);

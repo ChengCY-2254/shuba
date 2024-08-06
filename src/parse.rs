@@ -36,6 +36,7 @@ pub async fn get_driver(
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
+///在这里添加更多的下载模式解析。
 pub enum DownloadMode {
     Chapter(String),
     Directory(String),
@@ -73,6 +74,7 @@ fn is_shuba(value: &str) -> Option<DownloadMode> {
     }
 }
 
+#[allow(clippy::unnecessary_unwrap)]
 pub fn parse_download_path(p: Option<&String>) -> Box<std::path::Path> {
     return if p.is_none() {
         std::env::current_dir().unwrap().join("downloads").into_boxed_path()

@@ -3,7 +3,7 @@ use std::path::Path;
 
 pub type Driver = fantoccini::Client;
 pub type By<'a> = fantoccini::Locator<'a>;
-
+#[deprecated(note = "计划抛弃它，改为结构体自行添加成员方法")]
 pub trait ParseWith<T = Driver> {
     type Output;
     type Error;
@@ -28,5 +28,14 @@ pub trait Download {
         url: impl AsRef<str>,
         path: &Path,
     ) -> Result<Box<crate::traits::Driver>, Box<dyn std::error::Error>>;
-    
+}
+
+pub trait Run {
+    async fn run(
+        &self,
+        address: &str,
+        download_path: &std::path::Path,
+        proxy_str: Option<&str>,
+        mode: crate::parse::DownloadMode,
+    ) -> Result<(), Box<dyn std::error::Error>>;
 }
