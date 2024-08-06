@@ -15,6 +15,7 @@ impl Download for Shuba {
     ) -> Result<Box<Driver>, Box<dyn Error>> {
         let link = url.as_ref();
         driver.goto(link).await.ok();
+        driver.set_window_size(1109,797).await.ok();
         let chapter = crate::model::Chapters::parse_with_shuba(&driver)
             .await
             .unwrap()
@@ -39,6 +40,7 @@ impl Download for Shuba {
             .unwrap()
             .progress_chars("##-");
         driver.goto(link).await.ok();
+        driver.set_window_size(1109,797).await.ok();
         println!("开始解析");
         let directory = crate::model::Directory::parse_with_shuba(&driver)
             .await
@@ -56,7 +58,7 @@ impl Download for Shuba {
             driver.goto(href.as_str()).await.ok();
             use std::io::Write;
 
-            pb.set_message(title);
+            pb.set_message(title.clone());
             let chapter = crate::model::Chapters::parse_with_shuba(&driver)
                 .await
                 .unwrap()
