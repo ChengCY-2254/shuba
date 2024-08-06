@@ -14,6 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        # see https://github.com/actions/runner-images
         os: [macos-latest,windows-latest,ubuntu-latest]
 
     steps:
