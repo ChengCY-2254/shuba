@@ -1,8 +1,9 @@
+#![cfg(feature = "shuba")]
+
 use crate::parse::DownloadMode;
-use crate::traits::{Download, Driver, ParseWith, Run};
+use crate::traits::{Download, Driver, Run};
 use std::error::Error;
 use std::path::Path;
-
 pub struct Shuba;
 
 impl Download for Shuba {
@@ -11,10 +12,10 @@ impl Download for Shuba {
         driver: Box<Driver>,
         url: impl AsRef<str>,
         path: &Path,
-    ) -> Result<Box<crate::traits::Driver>, Box<dyn Error>> {
+    ) -> Result<Box<Driver>, Box<dyn Error>> {
         let link = url.as_ref();
         driver.goto(link).await.ok();
-        let chapter = crate::model::Chapters::parse_with(&driver)
+        let chapter = crate::model::Chapters::parse_with_shuba(&driver)
             .await
             .unwrap()
             .unwrap();
@@ -39,7 +40,9 @@ impl Download for Shuba {
             .progress_chars("##-");
         driver.goto(link).await.ok();
         println!("开始解析");
-        let directory = crate::model::Directory::parse_with(&driver).await.unwrap();
+        let directory = crate::model::Directory::parse_with_shuba(&driver)
+            .await
+            .unwrap();
         println!("解析完成，需要下载{}章", directory.inner_data.len());
 
         let pb = indicatif::ProgressBar::new(directory.inner_data.len() as u64);
@@ -54,7 +57,7 @@ impl Download for Shuba {
             use std::io::Write;
 
             pb.set_message(title);
-            let chapter = crate::model::Chapters::parse_with(&driver)
+            let chapter = crate::model::Chapters::parse_with_shuba(&driver)
                 .await
                 .unwrap()
                 .unwrap();
