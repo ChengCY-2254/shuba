@@ -1,7 +1,7 @@
-use crate::traits::Run;
 
 pub enum Handlers {
     #[cfg(feature = "shuba")]
+    //需要把枚举值全部打印出来
     Shuba(crate::handlers::Shuba),
 }
 
@@ -21,15 +21,18 @@ impl std::convert::TryFrom<&str> for Handlers {
 impl Handlers {
     #[allow(unreachable_patterns)]
     pub async fn run(
-        &self,
+        self,
         address: &str,
         download_path: &std::path::Path,
         proxy_str: Option<&str>,
         mode: crate::parse::DownloadMode,
+        sleed: Option<f32>,
     ) -> Result<(), Box<dyn std::error::Error>> {
+        use crate::traits::Run;
+
         match self {
             #[cfg(feature = "shuba")]
-            Handlers::Shuba(handle) => handle.run(address, download_path, proxy_str, mode).await,
+            Handlers::Shuba(handle) => handle.run(address, download_path, proxy_str, mode,sleed).await,
             _ => Err("未找到与域名对应的下载器".into()),
         }
     }

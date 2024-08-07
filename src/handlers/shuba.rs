@@ -15,7 +15,7 @@ impl Download for Shuba {
     ) -> Result<Box<Driver>, Box<dyn Error>> {
         let link = url.as_ref();
         driver.goto(link).await.ok();
-        driver.set_window_size(1109,797).await.ok();
+        driver.set_window_size(1109, 797).await.ok();
         let chapter = crate::model::Chapters::parse_with_shuba(&driver)
             .await
             .unwrap()
@@ -34,19 +34,26 @@ impl Download for Shuba {
         driver: Box<Driver>,
         url: impl AsRef<str>,
         path: &Path,
+        sleed: Option<f32>,
     ) -> Result<Box<crate::traits::Driver>, Box<dyn Error>> {
         let link = url.as_ref();
         let sty = indicatif::ProgressStyle::with_template("{msg} {wide_bar} {pos}/{len} ")
             .unwrap()
             .progress_chars("##-");
         driver.goto(link).await.ok();
-        driver.set_window_size(1109,797).await.ok();
+        driver.set_window_size(1109, 797).await.ok();
         println!("开始解析");
         let directory = crate::model::Directory::parse_with_shuba(&driver)
             .await
             .unwrap();
         println!("解析完成，需要下载{}章", directory.inner_data.len());
-
+        let sleed = if let Some(sleed) = sleed {
+            let duration = std::time::Duration::from_millis((sleed*1000.) as u64);
+            println!("每章需要等待{}s", duration.as_secs_f32());
+            Some(duration)
+        } else {
+            None
+        };
         let pb = indicatif::ProgressBar::new(directory.inner_data.len() as u64);
         pb.set_style(sty);
         pb.set_message("开始下载");
@@ -66,6 +73,10 @@ impl Download for Shuba {
             f.write_all(chapter.to_string().as_bytes())?;
             drop(chapter);
             pb.inc(1);
+            //是否等待
+            if let Some(sleed) = &sleed {
+                tokio::time::sleep(*sleed).await;
+            }
         }
         pb.finish_with_message("dene");
         Ok(driver)
@@ -79,6 +90,7 @@ impl Run for Shuba {
         download_path: &std::path::Path,
         proxy_str: Option<&str>,
         mode: crate::parse::DownloadMode,
+        sleed: Option<f32>,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let driver = Box::new(crate::parse::get_driver(address, proxy_str).await?);
         let driver = match mode {
@@ -86,7 +98,8 @@ impl Run for Shuba {
                 self.download_chapter(driver, link, download_path).await?
             }
             DownloadMode::Directory(ref link) => {
-                self.download_directory(driver, link, download_path).await?
+                self.download_directory(driver, link, download_path, sleed)
+                    .await?
             }
         };
         driver.close().await.ok();

@@ -13,8 +13,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let proxy_str: Option<&str> = matches
         .get_one::<String>("proxy_address")
         .map(String::as_ref);
-    let download_path:Option<&String> = matches.get_one("download_path");
-
+    let download_path: Option<&String> = matches.get_one("download_path");
+    let sleed:Option<f32> = matches.get_one("speed").map(|str:&String|str.parse::<f32>().unwrap());
+    
+    
     let handler = handler::Handlers::try_from(url.as_str())?;
     let download_mode = parse::DownloadMode::try_from(url.as_str()).unwrap();
 
@@ -25,7 +27,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     //统计运行时间
     let start = std::time::Instant::now();
     handler
-        .run(address, &downloads, proxy_str, download_mode)
+        .run(address, &downloads, proxy_str, download_mode,sleed)
         .await
         .map_err(|e| format!("下载时出现错误 {:?}", e))?;
     println!("下载完成，用时: {:?}", start.elapsed());
@@ -68,6 +70,13 @@ fn cli() -> clap::Command {
                 .required(false)
                 .long("path")
                 .short('p')
-                .help("指定下载路径，默认为当前目录下的downloads文件夹")
+                .help("指定下载路径，默认为当前目录下的downloads文件夹"),
+        )
+        .arg(
+            clap::Arg::new("speed")
+                .long("speed")
+                .required(false)
+                .help("抓取间隔，默认不限制。单位为秒")
+            ,
         )
 }

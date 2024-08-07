@@ -32,6 +32,11 @@
 
 `-p`参数用于下载到指定目录，默认下载到当前目录下的`downloads`文件夹中
 
+`--speed`参数用于每章节下载间隔，默认不限制，单位是秒。
+```shell
+./shuba -l 'https://69shuba.cx/book/43314.htm' --speed 1`
+```
+
 
 ## Future
 - [x] 支持浏览器代理
