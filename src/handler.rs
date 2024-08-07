@@ -28,13 +28,13 @@ impl Handlers {
         download_path: &std::path::Path,
         proxy_str: Option<&str>,
         mode: crate::parse::DownloadMode,
-        sleed: Option<f32>,
+        speed: Option<f32>,
     ) -> Result<(), Box<dyn std::error::Error>> {
         use crate::traits::Run;
 
         match self {
             #[cfg(feature = "shuba")]
-            Handlers::Shuba(handle) => handle.run(address, download_path, proxy_str, mode,sleed).await,
+            Handlers::Shuba(handle) => handle.run(address, download_path, proxy_str, mode,speed).await,
             _ => Err("未找到与域名对应的下载器".into()),
         }
     }

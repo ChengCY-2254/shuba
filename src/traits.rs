@@ -21,7 +21,7 @@ pub trait Download {
         url: impl AsRef<str>,
         path: &Path,
         //下载速率，是否需要间隔多少秒
-        sleed: Option<f32>,
+        speed: Option<f32>,
     ) -> Result<Box<crate::traits::Driver>, Box<dyn std::error::Error>>;
 }
 /// 每个新的解析器都需要实现这里的trait以供下载器调用
@@ -32,6 +32,6 @@ pub trait Run {
         download_path: &std::path::Path,
         proxy_str: Option<&str>,
         mode: crate::parse::DownloadMode,
-        sleed: Option<f32>,
+        speed: Option<f32>,
     ) -> Result<(), Box<dyn std::error::Error>>;
 }

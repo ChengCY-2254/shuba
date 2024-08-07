@@ -17,7 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .get_one::<String>("proxy_address")
         .map(String::as_ref);
     let download_path: Option<&String> = matches.get_one("download_path");
-    let sleed: Option<f32> = matches
+    let speed: Option<f32> = matches
         .get_one("speed")
         .map(|str: &String| str.parse::<f32>().unwrap());
     
@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     //统计运行时间
     let start = std::time::Instant::now();
     handler
-        .run(address, &downloads, proxy_str, download_mode, sleed)
+        .run(address, &downloads, proxy_str, download_mode, speed)
         .await
         .map_err(|e| format!("下载时出现错误 {:?}", e))?;
     println!("下载完成，用时: {:?}", start.elapsed());
