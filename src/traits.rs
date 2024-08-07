@@ -5,7 +5,6 @@ pub type Driver = fantoccini::Client;
 pub type By<'a> = fantoccini::Locator<'a>;
 
 /// 通过该trait下载内容
-/// 通过选择url来匹配主机地址，将内容返回为Box<dyn Download>让一个空结构体来实现Download trait，然后通过解析不同的主机地址返回不同的下载枚举。
 /// 完成后将Driver返回以供下一次调用
 pub trait Download {
     /// 下载指定章节
@@ -25,7 +24,7 @@ pub trait Download {
         sleed: Option<f32>,
     ) -> Result<Box<crate::traits::Driver>, Box<dyn std::error::Error>>;
 }
-
+/// 每个新的解析器都需要实现这里的trait以供下载器调用
 pub trait Run {
     async fn run(
         &self,

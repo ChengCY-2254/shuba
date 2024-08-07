@@ -4,6 +4,9 @@ use crate::parse::DownloadMode;
 use crate::traits::{Download, Driver, Run};
 use std::error::Error;
 use std::path::Path;
+use futures::FutureExt;
+use log::info;
+
 pub struct Shuba;
 
 impl Download for Shuba {
@@ -20,8 +23,11 @@ impl Download for Shuba {
             .await
             .unwrap()
             .unwrap();
-        let mut f = std::fs::File::create(path.join(format!("{}.txt", chapter.chapters_name)))?;
+        let file_name = format!("{}.txt", chapter.chapters_name);
+        info!("创建文件:{}",file_name);
+        let mut f = std::fs::File::create(path.join(file_name))?;
         use std::io::Write;
+        info!("开始下载:{}",link);
         println!("开始下载");
         println!("正在下载: {}", chapter.chapters_name);
 
@@ -62,15 +68,19 @@ impl Download for Shuba {
         for chapters_link in directory.inner_data {
             let title = chapters_link.title;
             let href = chapters_link.href;
+            info!("前往地址 {}",href);
             driver.goto(href.as_str()).await.ok();
             use std::io::Write;
 
             pb.set_message(title.clone());
+            info!("下载章节:{}",title);
             let chapter = crate::model::Chapters::parse_with_shuba(&driver)
                 .await
                 .unwrap()
                 .unwrap();
-            f.write_all(chapter.to_string().as_bytes())?;
+            let cache = chapter.to_string();
+            info!("写入文件:{},长度为{}",title,cache.len());
+            f.write_all(cache.as_bytes())?;
             drop(chapter);
             pb.inc(1);
             //是否等待
@@ -95,13 +105,16 @@ impl Run for Shuba {
         let driver = Box::new(crate::parse::get_driver(address, proxy_str).await?);
         let driver = match mode {
             DownloadMode::Chapter(ref link) => {
+                info!("下载章节:{}",link);
                 self.download_chapter(driver, link, download_path).await?
             }
             DownloadMode::Directory(ref link) => {
+                info!("下载全本:{}",link);
                 self.download_directory(driver, link, download_path, sleed)
                     .await?
             }
         };
+        info!("关闭浏览器");
         driver.close().await.ok();
         Ok(())
     }

@@ -1,3 +1,4 @@
+use log::info;
 
 pub enum Handlers {
     #[cfg(feature = "shuba")]
@@ -11,6 +12,7 @@ impl std::convert::TryFrom<&str> for Handlers {
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         #[cfg(feature = "shuba")]
         if value.starts_with("https://69shuba.cx") {
+            info!("选择解析器：69shuba");
             return Ok(Handlers::Shuba(crate::handlers::Shuba));
         }
 
