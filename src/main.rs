@@ -1,4 +1,4 @@
-
+mod build_info;
 mod handler;
 mod handlers;
 mod impls;
@@ -6,11 +6,13 @@ mod model;
 mod parse;
 mod traits;
 
+const VERSION: &str = "0.2.1";
+
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
     let matches = cli().get_matches();
-    
+
     let address = matches.get_one::<String>("address").unwrap();
     let url = matches.get_one::<String>("url").unwrap();
     let proxy_str: Option<&str> = matches
@@ -20,8 +22,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let speed: Option<f32> = matches
         .get_one("speed")
         .map(|str: &String| str.parse::<f32>().unwrap());
-    
-    if matches.get_flag("debug"){
+
+    if matches.get_flag("debug") {
         std::env::set_var("RUST_LOG", "debug");
     }
 
@@ -44,9 +46,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 fn cli() -> clap::Command {
     clap::Command::new("shuba")
-        .about("专属于69书吧的下载器 https://69shuba.cx")
+        .about(format!(" 专属于69书吧的下载器 https://69shuba.cx\n 仓库地址 https://github.com/ChengCY-2254/shuba\n 构建id {}",build_info::GIT_HASH_8))
         .author("Cheng")
-        .version("0.1.0")
+        .version(VERSION)
         .arg_required_else_help(true)
         .arg(
             //地址
