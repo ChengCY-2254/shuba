@@ -34,7 +34,7 @@
 
 `--speed`参数用于每章节下载间隔，默认不限制，单位是秒。
 ```shell
-./shuba -l 'https://69shuba.cx/book/43314.htm' --speed 1`
+./shuba -l 'https://69shuba.cx/book/43314.htm' --speed 1
 ```
 
 
@@ -43,4 +43,10 @@
 - [x] 下载章节
 - [x] 下载全本
 - [x] 远程连接WebDriver进行抓取
-- [ ] 将数据模型和trait分离使其可以支持其它网站
+- [x] 将数据模型和trait分离使其可以支持其它网站
+- [ ] 登录数据保存
+- [ ] 添加epub格式
+
+## 支持的网站
+- [x] [69书吧](https://69shuba.cx/)
+- [ ] [第二书包网](https://www.keryo.net/)

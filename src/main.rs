@@ -1,4 +1,7 @@
+use crate::model::CliArguments;
+
 mod build_info;
+mod cli;
 mod handler;
 mod handlers;
 mod impls;
@@ -6,93 +9,30 @@ mod model;
 mod parse;
 mod traits;
 
-const VERSION: &str = "0.2.1";
-
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
-    let matches = cli().get_matches();
+    let matches = cli::cli().get_matches();
+    
+    let arguments = CliArguments::from(matches);
 
-    let address = matches.get_one::<String>("address").unwrap();
-    let url = matches.get_one::<String>("url").unwrap();
-    let proxy_str: Option<&str> = matches
-        .get_one::<String>("proxy_address")
-        .map(String::as_ref);
-    let download_path: Option<&String> = matches.get_one("download_path");
-    let speed: Option<f32> = matches
-        .get_one("speed")
-        .map(|str: &String| str.parse::<f32>().unwrap());
-
-    if matches.get_flag("debug") {
+    if arguments.debug {
         std::env::set_var("RUST_LOG", "debug");
     }
-
-    let handler = handler::Handlers::try_from(url.as_str())?;
-    let download_mode = parse::DownloadMode::try_from(url.as_str()).unwrap();
-
-    let downloads = parse::parse_download_path(download_path);
+    let url = arguments.url.clone();
+    let handler = handler::Handlers::try_from(url.as_ref())?;
+    let download_mode = parse::DownloadMode::try_from(&arguments).unwrap();
+    
+    let downloads = parse::parse_download_path(arguments.download_path.clone());
     if !downloads.exists() {
         std::fs::create_dir_all(&downloads)?;
     }
     //统计运行时间
     let start = std::time::Instant::now();
     handler
-        .run(address, &downloads, proxy_str, download_mode, speed)
+        .run(arguments, download_mode, &downloads)
         .await
         .map_err(|e| format!("下载时出现错误 {:?}", e))?;
     println!("下载完成，用时: {:?}", start.elapsed());
     Ok(())
-}
-
-fn cli() -> clap::Command {
-    clap::Command::new("shuba")
-        .about(format!(" 专属于69书吧的下载器 https://69shuba.cx\n 仓库地址 https://github.com/ChengCY-2254/shuba\n 构建id {}",build_info::GIT_HASH_8))
-        .author("Cheng")
-        .version(VERSION)
-        .arg_required_else_help(true)
-        .arg(
-            //地址
-            clap::Arg::new("address")
-                .short('a')
-                .long("host")
-                .value_name("host")
-                .help("指定一个运行了webDriver的远程主机进行抓取操作")
-                .required(false)
-                .default_value("http://localhost:9515"),
-        )
-        .arg(
-            clap::Arg::new("url")
-                .required(true)
-                .short('l')
-                .long("url")
-                .value_name("url")
-                .help("需要抓取的地址"),
-        )
-        .arg(
-            clap::Arg::new("proxy_address")
-                .required(false)
-                .long("proxy")
-                .help("让浏览器通过代理进行网页访问，使用socks5代理")
-                .value_name("proxy_address"),
-        )
-        .arg(
-            clap::Arg::new("download_path")
-                .required(false)
-                .long("path")
-                .short('p')
-                .help("指定下载路径，默认为当前目录下的downloads文件夹"),
-        )
-        .arg(
-            clap::Arg::new("speed")
-                .long("speed")
-                .required(false)
-                .help("抓取间隔，默认不限制。单位为秒"),
-        )
-        .arg(
-            clap::Arg::new("debug")
-                .long("debug")
-                .help("设置debug模式，打印更多调试信息")
-                .required(false)
-                .action(clap::ArgAction::SetTrue),
-        )
 }

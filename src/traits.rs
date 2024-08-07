@@ -30,7 +30,7 @@ pub trait Run {
         &self,
         address: &str,
         download_path: &std::path::Path,
-        proxy_str: Option<&str>,
+        proxy_str: Option<String>,
         mode: crate::parse::DownloadMode,
         speed: Option<f32>,
     ) -> Result<(), Box<dyn std::error::Error>>;

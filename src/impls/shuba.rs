@@ -7,7 +7,7 @@ use tokio::join;
 
 impl Book {
     pub async fn parse_with_shuba(driver: &'_ Driver) -> Result<Book, Box<dyn Error>> {
-        let mut res = crate::model::BookBuilder::default();
+        let mut res = crate::model::Book::builder();
         let meta_elements = driver
             .find_all(By::Css("head > meta"))
             .await
@@ -37,13 +37,13 @@ impl Book {
         let words_count = words_count.text().await;
         res.chapters_len(words_count.unwrap_or_default().parse().unwrap_or_default());
 
-        Ok(res.build()?)
+        res.build()
     }
 }
 
 impl Chapters {
     pub async fn parse_with_shuba(driver: &'_ Driver) -> Result<Option<Chapters>, Box<dyn Error>> {
-        let mut builder = crate::model::ChaptersBuilder::default();
+        let mut builder = crate::model::Chapters::builder();
         let script = driver.find_all(By::XPath("/html/head/script[2]"));
         let title = driver.find(By::XPath("/html/body/div[2]/div[1]/div[3]/h1"));
         let chapter_title = driver.find(By::XPath("/html/body/div[2]/div[1]/div[3]/h1"));

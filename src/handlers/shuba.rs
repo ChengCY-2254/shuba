@@ -99,17 +99,17 @@ impl Run for Shuba {
         &self,
         address: &str,
         download_path: &Path,
-        proxy_str: Option<&str>,
+        proxy_str: Option<String>,
         mode: DownloadMode,
         speed: Option<f32>,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let driver = Box::new(crate::parse::get_driver(address, proxy_str).await?);
         let driver = match mode {
-            DownloadMode::Chapter(ref link) => {
+            DownloadMode::Chapter { url:link,format:_ } => {
                 info!("下载章节:{}",link);
                 self.download_chapter(driver, link, download_path).await?
             }
-            DownloadMode::Directory(ref link) => {
+            DownloadMode::Directory { url:link,format:_ } => {
                 info!("下载全本:{}",link);
                 self.download_directory(driver, link, download_path, speed)
                     .await?
