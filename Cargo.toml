@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 tokio = { version = "1.39.1", features = ["io-util", "rt", "macros"] }
-proc-macro-workshop = {git = "https://github.com/ChengCY-2254/proc-macro-workshop.git",rev = "ea0ab17"}
+proc-macro-workshop = {git = "https://github.com/ChengCY-2254/proc-macro-workshop.git",rev = "cfb9742c"}
 futures = "0.3.30"
 clap = "4.5.11"
 indicatif = { version = "0.17.8" }
@@ -22,7 +22,9 @@ panic = 'abort'
 
 [features]
 shuba = []
-full = ["shuba"]
+keryo = []
+unstable=[]
+full = ["shuba","keryo"]
 
 [build-dependencies]
 chrono = "0.4.38"

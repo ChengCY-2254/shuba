@@ -126,7 +126,7 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 [[package]]
 name = "bitfield"
 version = "0.0.0"
-source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=ea0ab17#ea0ab17c80c3653f59176f27347b79a2da2b9f94"
+source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=cfb9742c#cfb9742c60ebe9e62bf46938af9a21b14f26c01f"
 dependencies = [
  "bitfield-impl",
 ]
@@ -134,7 +134,7 @@ dependencies = [
 [[package]]
 name = "bitfield-impl"
 version = "0.0.0"
-source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=ea0ab17#ea0ab17c80c3653f59176f27347b79a2da2b9f94"
+source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=cfb9742c#cfb9742c60ebe9e62bf46938af9a21b14f26c01f"
 
 [[package]]
 name = "bitflags"
@@ -296,7 +296,7 @@ dependencies = [
 [[package]]
 name = "derive_builder"
 version = "0.0.0"
-source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=ea0ab17#ea0ab17c80c3653f59176f27347b79a2da2b9f94"
+source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=cfb9742c#cfb9742c60ebe9e62bf46938af9a21b14f26c01f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -306,7 +306,7 @@ dependencies = [
 [[package]]
 name = "derive_debug"
 version = "0.0.0"
-source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=ea0ab17#ea0ab17c80c3653f59176f27347b79a2da2b9f94"
+source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=cfb9742c#cfb9742c60ebe9e62bf46938af9a21b14f26c01f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -316,7 +316,7 @@ dependencies = [
 [[package]]
 name = "derive_enums"
 version = "0.0.0"
-source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=ea0ab17#ea0ab17c80c3653f59176f27347b79a2da2b9f94"
+source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=cfb9742c#cfb9742c60ebe9e62bf46938af9a21b14f26c01f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -988,7 +988,7 @@ checksum = "439ee305def115ba05938db6eb1644ff94165c5ab5e9420d1c1bcedbba909391"
 [[package]]
 name = "proc-macro-workshop"
 version = "0.0.0"
-source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=ea0ab17#ea0ab17c80c3653f59176f27347b79a2da2b9f94"
+source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=cfb9742c#cfb9742c60ebe9e62bf46938af9a21b14f26c01f"
 dependencies = [
  "bitfield",
  "derive_builder",
@@ -1105,7 +1105,7 @@ dependencies = [
 [[package]]
 name = "seq"
 version = "0.0.0"
-source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=ea0ab17#ea0ab17c80c3653f59176f27347b79a2da2b9f94"
+source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=cfb9742c#cfb9742c60ebe9e62bf46938af9a21b14f26c01f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1190,7 +1190,7 @@ dependencies = [
 [[package]]
 name = "sorted"
 version = "0.0.0"
-source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=ea0ab17#ea0ab17c80c3653f59176f27347b79a2da2b9f94"
+source = "git+https://github.com/ChengCY-2254/proc-macro-workshop.git?rev=cfb9742c#cfb9742c60ebe9e62bf46938af9a21b14f26c01f"
 dependencies = [
  "proc-macro2",
  "quote",

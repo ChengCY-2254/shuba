@@ -10,18 +10,6 @@ pub enum DownloadMode {
     Directory { url: String, format: Format },
 }
 
-// impl std::convert::TryFrom<&str> for DownloadMode {
-//     type Error = &'static str;
-// 
-//     fn try_from(value: &str) -> Result<Self, Self::Error> {
-//         #[cfg(feature = "shuba")]
-//         if let Some(mode) = is_shuba(value, ) {
-//             return Ok(mode);
-//         }
-// 
-//         Err("无法识别的下载模式")
-//     }
-// }
 
 impl std::convert::TryFrom<&CliArguments> for DownloadMode{
     type Error = &'static str;

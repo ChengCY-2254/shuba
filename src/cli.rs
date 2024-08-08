@@ -1,6 +1,5 @@
 use crate::build_info;
-use crate::parse::Format;
-use clap::value_parser;
+
 
 const VERSION: &str = "0.2.1";
 
@@ -35,7 +34,8 @@ fn about() -> String {
 
 // fn build_handler_msg(){}
 pub fn cli() -> clap::Command {
-    clap::Command::new("shuba")
+    #[allow(unused_mut)]
+    let mut cli = clap::Command::new("shuba")
         .long_about(build_long_about())
         .about(about())
         .author("Cheng")
@@ -85,11 +85,18 @@ pub fn cli() -> clap::Command {
                 .help("设置debug模式，打印更多调试信息")
                 .required(false)
                 .action(clap::ArgAction::SetTrue),
-        )
-        .arg(
-            clap::Arg::new("download_format")
-                .long("format")
-                .value_parser(value_parser!(Format))
-                .help("指定下载格式，默认为txt"),
-        )
+        );
+    
+        #[cfg(feature = "unstable")]
+        {
+            use crate::parse::Format;
+            use clap::value_parser;
+            cli = cli.arg(
+                clap::Arg::new("download_format")
+                    .long("format")
+                    .value_parser(value_parser!(Format))
+                    .help("指定下载格式，默认为txt"),
+            );
+        }
+    cli
 }

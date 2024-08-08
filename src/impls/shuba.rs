@@ -1,8 +1,6 @@
-// #![cfg(feature = "shuba")]
-use crate::model::{Book, ChapterLink, Chapters, Directory};
+use crate::model::{Book, ChapterLink, Chapter, Directory};
 use crate::traits::{By, Driver};
 use std::error::Error;
-use std::fmt::Formatter;
 use tokio::join;
 
 impl Book {
@@ -41,15 +39,15 @@ impl Book {
     }
 }
 
-impl Chapters {
-    pub async fn parse_with_shuba(driver: &'_ Driver) -> Result<Option<Chapters>, Box<dyn Error>> {
-        let mut builder = crate::model::Chapters::builder();
+impl Chapter {
+    pub async fn parse_with_shuba(driver: &'_ Driver) -> Result<Option<Chapter>, Box<dyn Error>> {
+        let mut builder = crate::model::Chapter::builder();
         let script = driver.find_all(By::XPath("/html/head/script[2]"));
         let title = driver.find(By::XPath("/html/body/div[2]/div[1]/div[3]/h1"));
         let chapter_title = driver.find(By::XPath("/html/body/div[2]/div[1]/div[3]/h1"));
         let text_block = driver.find_all(By::XPath("html/body/div[2]/div[1]/div[3]"));
 
-        if let (Ok(_script), Ok(_title), Ok(chapter_title), Ok(text_block)) =
+        if let (Ok(_script), Ok(title), Ok(_chapter_title), Ok(text_block)) =
             join!(script, title, chapter_title, text_block)
         {
             {
@@ -58,8 +56,8 @@ impl Chapters {
                 builder.chapters_content(chapters_content);
             }
             {
-                let chapters_name = chapter_title.text().await.unwrap_or_default();
-                builder.chapters_name(chapters_name);
+                let title = title.text().await?;
+                builder.chapters_name(title);
             }
         }
         Ok(Some(builder.build().unwrap()))
@@ -72,7 +70,7 @@ async fn get_text_from_div(div: &fantoccini::elements::Element) -> Result<String
         .map(|s| {
             s.replace("<br>", "\r\n")
                 .lines()
-                .skip(2)
+                .skip(3)
                 //这里使用fold是为了保持换行格式
                 .fold(String::new(), |mut acc, r| {
                     acc.push_str(r);
@@ -83,18 +81,7 @@ async fn get_text_from_div(div: &fantoccini::elements::Element) -> Result<String
         .map_err(|e| format!("get text from div error:{}", e).into())
 }
 
-impl std::fmt::Display for Chapters {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            self.chapters_content
-                .replace("Copyright 2024 69shuba.cx", "")
-        )?;
-        write!(f, "\n\n")?;
-        Ok(())
-    }
-}
+
 
 impl Directory {
     pub async fn parse_with_shuba(driver: &'_ Driver) -> Result<Directory, Box<dyn Error>> {

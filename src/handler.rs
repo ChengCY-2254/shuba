@@ -34,6 +34,7 @@ impl Handlers {
         let address: &str = cli_arguments.address.as_str();
         let proxy_str = cli_arguments.proxy_str;
         let speed = cli_arguments.speed;
+        // let format = cli_arguments.format;
         match self {
             #[cfg(feature = "shuba")]
             Handlers::Shuba(handle) => {

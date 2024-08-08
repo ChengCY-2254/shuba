@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 use std::path::Path;
+use crate::parse::Format;
 
 pub type Driver = fantoccini::Client;
 pub type By<'a> = fantoccini::Locator<'a>;
@@ -13,6 +14,7 @@ pub trait Download {
         driver: Box<Driver>,
         url: impl AsRef<str>,
         path: &Path,
+        format: Format,
     ) -> Result<Box<crate::traits::Driver>, Box<dyn std::error::Error>>;
     ///下载指定目录
     async fn download_directory(
@@ -22,6 +24,7 @@ pub trait Download {
         path: &Path,
         //下载速率，是否需要间隔多少秒
         speed: Option<f32>,
+        format: Format,
     ) -> Result<Box<crate::traits::Driver>, Box<dyn std::error::Error>>;
 }
 /// 每个新的解析器都需要实现这里的trait以供下载器调用

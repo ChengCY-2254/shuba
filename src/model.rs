@@ -1,12 +1,13 @@
 #![allow(unused)]
 
+use std::fmt::Formatter;
 use crate::parse::Format;
 use proc_macro_workshop::Builder;
 
 ///Chapters Content and Name
 /// https://69shuba.cx/txt/9958171/90560237
 #[derive(Debug, Builder, Clone)]
-pub struct Chapters {
+pub struct Chapter {
     pub chapters_name: String,
     pub chapters_content: String,
 }
@@ -71,5 +72,18 @@ impl From<clap::ArgMatches> for CliArguments {
             debug,
             format: format.clone(),
         }
+    }
+}
+
+impl std::fmt::Display for Chapter {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "{}", self.chapters_name)?;
+        write!(
+            f,
+            "{}",
+            self.chapters_content
+        )?;
+        write!(f, "\n\n")?;
+        Ok(())
     }
 }
