@@ -12,6 +12,7 @@ mod utils;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(feature = "env_logger")]
     env_logger::init();
     let matches = cli::cli().get_matches();
     

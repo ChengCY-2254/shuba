@@ -40,7 +40,7 @@ impl Book {
 }
 
 impl Chapter {
-    pub async fn parse_with_shuba(driver: &'_ Driver) -> Result<Option<Chapter>, Box<dyn Error>> {
+    pub async fn parse_with_shuba(driver: &'_ Driver) -> Result<Chapter, Box<dyn Error>> {
         let mut builder = crate::model::Chapter::builder();
         let script = driver.find_all(By::XPath("/html/head/script[2]"));
         let title = driver.find(By::XPath("/html/body/div[2]/div[1]/div[3]/h1"));
@@ -60,7 +60,7 @@ impl Chapter {
                 builder.chapters_name(title);
             }
         }
-        Ok(Some(builder.build().unwrap()))
+        Ok(builder.build().unwrap())
     }
 }
 /// https://github.com/ChengCY-2254/shuba/issues/5

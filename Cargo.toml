@@ -12,8 +12,8 @@ indicatif = { version = "0.17.8" }
 fantoccini = "0.21.0"
 serde = "1.0.204"
 serde_json = "1.0.122"
-log = "0.4.22"
-env_logger = "0.11.5"
+log = { version = "0.4.22" }
+env_logger = { version = "0.11.5", optional = true }
 chinese-number = { version = "0.7.7", optional = true, features = ["chinese-to-number"] }
 [profile.release]
 lto = true
@@ -25,6 +25,7 @@ shuba = []
 keryo = ["chinese-number"]
 unstable = []
 full = ["shuba", "keryo"]
+debug = ["full", "env_logger"]
 
 [build-dependencies]
 chrono = "0.4.38"
