@@ -6,6 +6,8 @@ use log::info;
 pub enum Handlers {
     #[cfg(feature = "shuba")]
     Shuba(crate::handlers::Shuba),
+    #[cfg(feature = "keryo")]
+    Keryo(crate::handlers::Keryo),
 }
 
 impl std::convert::TryFrom<&str> for Handlers {
@@ -16,6 +18,11 @@ impl std::convert::TryFrom<&str> for Handlers {
         if value.starts_with("https://69shuba.cx") {
             info!("选择解析器：69shuba");
             return Ok(Handlers::Shuba(crate::handlers::Shuba));
+        }
+        #[cfg(feature = "keryo")]
+        if value.starts_with("https://www.keryo.net") {
+            info!("选择解析器：keryo");
+            return Ok(Handlers::Keryo(crate::handlers::Keryo));
         }
         info!("未找到解析器");
         Err("未找到与域名对应的解析器")
@@ -38,6 +45,12 @@ impl Handlers {
         match self {
             #[cfg(feature = "shuba")]
             Handlers::Shuba(handle) => {
+                handle
+                    .run(address, download_path, proxy_str, mode, speed)
+                    .await
+            }
+            #[cfg(feature = "keryo")]
+            Handlers::Keryo(handle) => {
                 handle
                     .run(address, download_path, proxy_str, mode, speed)
                     .await

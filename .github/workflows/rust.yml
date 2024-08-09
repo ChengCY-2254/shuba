@@ -29,7 +29,7 @@ jobs:
           ~/.cargo/git/db/
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Run tests
-      run: cargo test --verbose
+      run: cargo test --verbose --features full
     - name: Build
       run: cargo build --verbose --release --features full
     - name: 'Upload build target'

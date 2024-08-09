@@ -1,11 +1,11 @@
 [package]
 name = "shuba"
-version = "0.1.0"
+version = "0.2.2"
 edition = "2021"
 
 [dependencies]
 tokio = { version = "1.39.1", features = ["io-util", "rt", "macros"] }
-proc-macro-workshop = {git = "https://github.com/ChengCY-2254/proc-macro-workshop.git",rev = "cfb9742c"}
+proc-macro-workshop = { git = "https://github.com/ChengCY-2254/proc-macro-workshop.git", rev = "cfb9742c" }
 futures = "0.3.30"
 clap = "4.5.11"
 indicatif = { version = "0.17.8" }
@@ -14,7 +14,7 @@ serde = "1.0.204"
 serde_json = "1.0.122"
 log = "0.4.22"
 env_logger = "0.11.5"
-epub-builder = "0.7.4"
+chinese-number = { version = "0.7.7", optional = true, features = ["chinese-to-number"] }
 [profile.release]
 lto = true
 codegen-units = 1
@@ -22,9 +22,9 @@ panic = 'abort'
 
 [features]
 shuba = []
-keryo = []
-unstable=[]
-full = ["shuba","keryo"]
+keryo = ["chinese-number"]
+unstable = []
+full = ["shuba", "keryo"]
 
 [build-dependencies]
 chrono = "0.4.38"

@@ -1,7 +1,6 @@
 use crate::build_info;
 
-
-const VERSION: &str = "0.2.1";
+const VERSION: &str = "0.2.2";
 
 fn build_long_about() -> String {
     format!(
@@ -86,17 +85,17 @@ pub fn cli() -> clap::Command {
                 .required(false)
                 .action(clap::ArgAction::SetTrue),
         );
-    
-        #[cfg(feature = "unstable")]
-        {
-            use crate::parse::Format;
-            use clap::value_parser;
-            cli = cli.arg(
-                clap::Arg::new("download_format")
-                    .long("format")
-                    .value_parser(value_parser!(Format))
-                    .help("指定下载格式，默认为txt"),
-            );
-        }
+
+    #[cfg(feature = "unstable")]
+    {
+        use crate::parse::Format;
+        use clap::value_parser;
+        cli = cli.arg(
+            clap::Arg::new("download_format")
+                .long("format")
+                .value_parser(value_parser!(Format))
+                .help("指定下载格式，默认为txt"),
+        );
+    }
     cli
 }

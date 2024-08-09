@@ -3,7 +3,6 @@
 use std::error::Error;
 use std::path::Path;
 
-use crate::parse::{DownloadMode, Format};
 use crate::traits::{Download, Driver, Run};
 use log::info;
 
@@ -15,11 +14,9 @@ impl Download for Shuba {
         driver: Box<Driver>,
         url: impl AsRef<str>,
         path: &Path,
-        format: Format,
     ) -> Result<Box<Driver>, Box<dyn Error>> {
         let link = url.as_ref();
         driver.goto(link).await.ok();
-        driver.set_window_size(1109, 797).await.ok();
         let mut chapter = crate::model::Chapter::parse_with_shuba(&driver)
             .await
             .unwrap()
@@ -28,21 +25,15 @@ impl Download for Shuba {
         println!("开始下载");
         println!("正在下载: {}", chapter.chapters_name);
         // 清除版权信息
-        chapter.chapters_content = chapter.chapters_content.replace("Copyright 2024 69shuba.cx", "");
-        match format {
-            Format::Txt => {
-                let file_name = format!("{}.txt", chapter.chapters_name);
-                info!("创建文件:{}", file_name);
-                let mut f = std::fs::File::create(path.join(file_name))?;
-                crate::utils::format::write_chapter_by_txt(chapter, &mut f)?;
-            }
-            Format::Epub => {
-                let file_name = format!("{}.epub", chapter.chapters_name);
-                info!("创建文件:{}", file_name);
-                let mut _f = std::fs::File::create(path.join(file_name))?;
-                unimplemented!()
-            }
-        };
+        chapter.chapters_content = chapter
+            .chapters_content
+            .replace("Copyright 2024 69shuba.cx", "");
+
+        let file_name = format!("{}.txt", chapter.chapters_name);
+        info!("创建文件:{}", file_name);
+        let mut f = std::fs::File::create(path.join(file_name))?;
+        crate::utils::format::write_chapter_by_txt(chapter, &mut f)?;
+
         Ok(driver)
     }
 
@@ -52,13 +43,13 @@ impl Download for Shuba {
         url: impl AsRef<str>,
         path: &Path,
         speed: Option<f32>,
-        _format: Format,
     ) -> Result<Box<Driver>, Box<dyn Error>> {
         let link = url.as_ref();
-        let mut progress = crate::utils::Progress::new("{msg} {wide_bar} {pos}/{len} ",Some("##-")).unwrap();
+        let mut progress =
+            crate::utils::Progress::new("{msg} {wide_bar} {pos}/{len} ", Some("##-")).unwrap();
         driver.goto(link).await.ok();
-        driver.set_window_size(1109, 797).await.ok();
         println!("开始解析");
+        println!("69书吧需要链接到外网，请确保你的网络可以访问69shuba.cx");
         let directory = crate::model::Directory::parse_with_shuba(&driver)
             .await
             .unwrap();
@@ -101,31 +92,4 @@ impl Download for Shuba {
     }
 }
 
-
-impl Run for Shuba {
-    async fn run(
-        &self,
-        address: &str,
-        download_path: &Path,
-        proxy_str: Option<String>,
-        mode: DownloadMode,
-        speed: Option<f32>,
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        let driver = Box::new(crate::parse::get_driver(address, proxy_str).await?);
-        let driver = match mode {
-            DownloadMode::Chapter { url: link, format } => {
-                info!("下载章节:{}", link);
-                self.download_chapter(driver, link, download_path, format)
-                    .await?
-            }
-            DownloadMode::Directory { url: link, format } => {
-                info!("下载全本:{}", link);
-                self.download_directory(driver, link, download_path, speed, format)
-                    .await?
-            }
-        };
-        info!("关闭浏览器");
-        driver.close().await.ok();
-        Ok(())
-    }
-}
+impl Run for Shuba {}

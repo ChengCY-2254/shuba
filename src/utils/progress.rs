@@ -1,7 +1,9 @@
-use std::borrow::Cow;
 use indicatif::style::TemplateError;
 use indicatif::{ProgressBar, ProgressStyle};
+use std::borrow::Cow;
 use tokio::sync::Mutex;
+
+pub const DEFAULT_TEMPLATE: &str = "{msg} {wide_bar} {pos}/{len} ";
 
 ///这里主要控制终端进度条的展示
 pub struct Progress {
@@ -28,20 +30,20 @@ impl Progress {
         self.pb = Some(pb);
     }
 
-    pub fn set_message(&mut self, msg: impl Into<Cow<'static,str>>) {
+    pub fn set_message(&mut self, msg: impl Into<Cow<'static, str>>) {
         if let Some(pb) = self.pb.take() {
             pb.set_message(msg);
             self.pb = Some(pb)
         }
     }
 
-    pub fn finish_with_message(&mut self,  msg: impl Into<Cow<'static,str>>) {
+    pub fn finish_with_message(&mut self, msg: impl Into<Cow<'static, str>>) {
         if let Some(pb) = self.pb.take() {
             pb.finish_with_message(msg);
             self.pb = Some(pb)
         }
     }
-    
+
     pub fn inc(&mut self, delta: u64) {
         if let Some(pb) = self.pb.take() {
             pb.inc(delta);

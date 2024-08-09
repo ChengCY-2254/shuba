@@ -1,7 +1,6 @@
 #![allow(unused)]
 
 use std::fmt::Formatter;
-use crate::parse::Format;
 use proc_macro_workshop::Builder;
 
 ///Chapters Content and Name
@@ -46,7 +45,6 @@ pub struct CliArguments {
     pub download_path: Option<String>,
     pub speed: Option<f32>,
     pub debug: bool,
-    pub format: Format,
 }
 
 impl From<clap::ArgMatches> for CliArguments {
@@ -59,9 +57,6 @@ impl From<clap::ArgMatches> for CliArguments {
             .get_one("speed")
             .map(|str: &String| str.parse::<f32>().unwrap());
         let debug = matches.get_flag("debug");
-        let format: &Format = matches
-            .get_one::<Format>("download_format")
-            .unwrap_or(&Format::Txt);
         
         CliArguments {
             address,
@@ -70,7 +65,6 @@ impl From<clap::ArgMatches> for CliArguments {
             download_path,
             speed,
             debug,
-            format: format.clone(),
         }
     }
 }

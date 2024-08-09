@@ -1,4 +1,4 @@
-use crate::model::{Book, ChapterLink, Chapter, Directory};
+use crate::model::{Book, Chapter, ChapterLink, Directory};
 use crate::traits::{By, Driver};
 use std::error::Error;
 use tokio::join;
@@ -81,8 +81,6 @@ async fn get_text_from_div(div: &fantoccini::elements::Element) -> Result<String
         .map_err(|e| format!("get text from div error:{}", e).into())
 }
 
-
-
 impl Directory {
     pub async fn parse_with_shuba(driver: &'_ Driver) -> Result<Directory, Box<dyn Error>> {
         let ul = driver
@@ -97,7 +95,7 @@ impl Directory {
         let mut inner_data = {
             let mut data = vec![];
             for li in ul {
-                let li_link = Self::parse_li(li)
+                let li_link = parse_li(li)
                     .await
                     .map_err(|e| format!("Failed to parse li: {}", e))?;
                 data.push(li_link);
@@ -113,17 +111,15 @@ impl Directory {
     }
 }
 
-impl Directory {
-    async fn parse_li(li: fantoccini::elements::Element) -> Result<ChapterLink, Box<dyn Error>> {
-        let id: usize = li
-            .attr("data-num")
-            .await?
-            .unwrap_or_default()
-            .parse()
-            .unwrap_or_default();
-        let a = li.find(By::Css("a")).await?;
-        let href = a.attr("href").await?.unwrap_or_default();
-        let title = a.text().await.unwrap_or_default();
-        Ok(ChapterLink { id, href, title })
-    }
+async fn parse_li(li: fantoccini::elements::Element) -> Result<ChapterLink, Box<dyn Error>> {
+    let id: usize = li
+        .attr("data-num")
+        .await?
+        .unwrap_or_default()
+        .parse()
+        .unwrap_or_default();
+    let a = li.find(By::Css("a")).await?;
+    let href = a.attr("href").await?.unwrap_or_default();
+    let title = a.text().await.unwrap_or_default();
+    Ok(ChapterLink { id, href, title })
 }
