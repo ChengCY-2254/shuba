@@ -1,14 +1,17 @@
-#![allow(dead_code)]
+#![allow(dead_code, unused_imports)]
 use crate::model::{Chapter, Directory};
 use crate::parse::DownloadMode;
 use log::info;
 use std::path::Path;
 
+#[cfg(feature = "web-driver")]
 pub type Driver = fantoccini::Client;
+#[cfg(feature = "web-driver")]
 pub type By<'a> = fantoccini::Locator<'a>;
 
 /// 通过该trait下载内容
 /// 完成后将Driver返回以供下一次调用
+#[cfg(feature = "web-driver")]
 pub trait Download {
     /// 下载指定章节
     async fn download_chapter(
@@ -88,6 +91,7 @@ pub trait Download {
     fn website_tips() -> Option<String>;
 }
 /// 每个新的解析器都需要实现这里的trait以供下载器调用
+#[cfg(feature = "web-driver")]
 pub trait Run: Download {
     async fn run(
         &self,

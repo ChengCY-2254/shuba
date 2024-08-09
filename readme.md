@@ -7,6 +7,8 @@
 
 如需此项目进行抓取，需要启动[WebDriver](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/)并默认监听在9515端口
 
+## 使用指南
+
 从目录页下载
 ```shell
 ./shuba -l https://69shuba.cx/book/46869/
@@ -37,6 +39,13 @@
 ./shuba -l 'https://69shuba.cx/book/43314.htm' --speed 1
 ```
 
+使用 `--support` 参数可查看当前版本可以对哪些网站进行抓取操作。
+例如：
+```shell
+./shuba --support
+# Shuba
+# Keryo
+```
 
 ## Future
 - [x] 支持浏览器代理
@@ -48,3 +57,39 @@
 ## 支持的网站
 - [x] [69书吧](https://69shuba.cx/)
 - [x] [第二书包网](https://www.keryo.net/)
+
+## 条件编译
+如果只需要该下载器的某一功能，那么在编译的过程中指定你所需要的功能就好。
+有以下features key
+- shuba
+- keryo
+- full
+- debug
+
+### 详细说明
+
+目前有以下版本可编译：
+
+- shuba 仅可抓取[69书吧](https://69shuba.cx/)的内容。
+- keryo 仅可抓取[第二书包网](https://www.keryo.net/)的内容。
+
+预定义版：
+
+- full 全网站支持版。
+- debug 添加了日志full版本，用于调试使用。
+
+### 编译示例
+
+条件编译的示例代码如下：
+
+注意：若要控制生成包大小，请务必加入`--release`标签以在生产环境中达到最佳效果。
+
+编译仅支持shuba版本
+```shell
+cargo b --features shuba
+```
+
+编译同时支持shuba和keryo的版本
+```shell
+cargo b --features keryo
+```

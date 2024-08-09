@@ -1,6 +1,7 @@
+#[cfg(feature = "chinese-number")]
 use chinese_number::{from_chinese_to_f32_high, from_chinese_to_usize_ten_thousand};
 use std::rc::Rc;
-
+#[allow(unused)]
 /// 在文字中寻找数字并返回,只查找整数。
 pub fn find_number(text: &str) -> Option<usize> {
     let mut number = String::new();
@@ -95,6 +96,7 @@ mod tests {
         assert_eq!(n, Some(10));
     }
     #[test]
+    #[cfg(feature = "chinese-number")]
     fn test_find_chinese_number() {
         let s = "第 一 章".to_string();
         let n = find_chinese_number(&s);
@@ -104,6 +106,7 @@ mod tests {
         assert_eq!(n, Some(11));
     }
     #[test]
+    #[cfg(feature = "chinese-number")]
     fn test_find_chinese_number_range() {
         let s = "第一章".to_string();
         let n = get_chinese_number(&s);

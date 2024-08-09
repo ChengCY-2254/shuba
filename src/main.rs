@@ -15,16 +15,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(feature = "env_logger")]
     env_logger::init();
     let matches = cli::cli().get_matches();
-    
+
     let arguments = CliArguments::from(matches);
 
     if arguments.debug {
-        std::env::set_var("RUST_LOG", "debug");
+        unsafe {
+            std::env::set_var("RUST_LOG", "debug");
+        }
     }
-    let url = arguments.url.clone();
+
+    if arguments.print_support {
+        log::info!("查看受支持的网站");
+        let handle_list = handler::Handlers::values();
+        handle_list
+            .iter()
+            .for_each(|web_site_name| println!("{web_site_name}"));
+        std::process::exit(0);
+    }
+
+    let url = arguments.url.clone().expect("请提供URL参数");
     let handler = handler::Handlers::try_from(url.as_ref())?;
-    let download_mode = parse::DownloadMode::try_from(&arguments).unwrap();
-    
+    let download_mode = parse::DownloadMode::try_from(url.as_ref()).unwrap();
+
     let downloads = parse::parse_download_path(arguments.download_path.clone());
     if !downloads.exists() {
         std::fs::create_dir_all(&downloads)?;

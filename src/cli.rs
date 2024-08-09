@@ -52,7 +52,7 @@ pub fn cli() -> clap::Command {
         )
         .arg(
             clap::Arg::new("url")
-                .required(true)
+                .required(false)
                 .short('l')
                 .long("url")
                 .value_name("url")
@@ -83,6 +83,12 @@ pub fn cli() -> clap::Command {
                 .long("debug")
                 .help("设置debug模式，打印更多调试信息")
                 .required(false)
+                .action(clap::ArgAction::SetTrue),
+        )
+        .arg(
+            clap::Arg::new("support_web_site")
+                .long("support")
+                .help("查看支持的网站")
                 .action(clap::ArgAction::SetTrue),
         );
 

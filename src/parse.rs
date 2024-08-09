@@ -1,4 +1,5 @@
-use crate::model::CliArguments;
+#![allow(unused_imports)]
+#[cfg(feature = "web-driver")]
 use fantoccini::wd::Capabilities;
 use serde_json::json;
 
@@ -9,11 +10,11 @@ pub enum DownloadMode {
     Directory { url: String },
 }
 
-impl std::convert::TryFrom<&CliArguments> for DownloadMode {
+impl std::convert::TryFrom<&str> for DownloadMode {
     type Error = &'static str;
 
-    fn try_from(value: &CliArguments) -> Result<Self, Self::Error> {
-        let url = &value.url;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let url = value;
         #[cfg(feature = "shuba")]
         if let Some(mode) = is_shuba(url) {
             return Ok(mode);
@@ -96,6 +97,7 @@ mod tests {
 
 ///解析代理字符串
 /// export https_proxy=http://127.0.0.1:8888;export http_proxy=http://127.0.0.1:8888;export all_proxy=socks5://127.0.0.1:8889
+#[cfg(feature = "web-driver")]
 fn parse_proxy_caps(
     caps: &mut Capabilities,
     proxy_str: Option<String>,
@@ -117,6 +119,7 @@ fn parse_proxy_caps(
     }
     Ok(())
 }
+#[cfg(feature = "web-driver")]
 #[inline]
 pub async fn get_driver(
     address: &str,

@@ -1,7 +1,7 @@
 #![allow(unused)]
 
-use std::fmt::Formatter;
 use proc_macro_workshop::Builder;
+use std::fmt::Formatter;
 
 ///Chapters Content and Name
 /// https://69shuba.cx/txt/9958171/90560237
@@ -40,24 +40,27 @@ pub struct ChapterLink {
 /// 用于存放解析后的参数
 pub struct CliArguments {
     pub address: String,
-    pub url: String,
+    pub url: Option<String>,
     pub proxy_str: Option<String>,
     pub download_path: Option<String>,
     pub speed: Option<f32>,
     pub debug: bool,
+    /// 是否打印受支持的网站
+    pub print_support: bool,
 }
 
 impl From<clap::ArgMatches> for CliArguments {
     fn from(matches: clap::ArgMatches) -> Self {
         let address = matches.get_one::<String>("address").unwrap().clone();
-        let url = matches.get_one::<String>("url").unwrap().clone();
+        let url = matches.get_one::<String>("url").clone().map(String::from);
         let proxy_str: Option<String> = matches.get_one::<String>("proxy_address").cloned();
         let download_path: Option<String> = matches.get_one("download_path").cloned();
         let speed: Option<f32> = matches
             .get_one("speed")
             .map(|str: &String| str.parse::<f32>().unwrap());
         let debug = matches.get_flag("debug");
-        
+        let print_support = matches.get_flag("support_web_site");
+
         CliArguments {
             address,
             url,
@@ -65,6 +68,7 @@ impl From<clap::ArgMatches> for CliArguments {
             download_path,
             speed,
             debug,
+            print_support,
         }
     }
 }
@@ -72,11 +76,7 @@ impl From<clap::ArgMatches> for CliArguments {
 impl std::fmt::Display for Chapter {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "{}", self.chapters_name)?;
-        write!(
-            f,
-            "{}",
-            self.chapters_content
-        )?;
+        write!(f, "{}", self.chapters_content)?;
         write!(f, "\n\n")?;
         Ok(())
     }

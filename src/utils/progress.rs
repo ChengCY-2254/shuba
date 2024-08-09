@@ -1,7 +1,6 @@
 use indicatif::style::TemplateError;
 use indicatif::{ProgressBar, ProgressStyle};
 use std::borrow::Cow;
-use tokio::sync::Mutex;
 
 pub const DEFAULT_TEMPLATE: &str = "{msg} {wide_bar} {pos}/{len} ";
 
