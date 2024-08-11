@@ -79,18 +79,22 @@ pub fn cli() -> clap::Command {
                 .help("抓取间隔，默认不限制。单位为秒"),
         )
         .arg(
-            clap::Arg::new("debug")
-                .long("debug")
-                .help("设置debug模式，打印更多调试信息")
-                .required(false)
-                .action(clap::ArgAction::SetTrue),
-        )
-        .arg(
             clap::Arg::new("support_web_site")
                 .long("support")
                 .help("查看支持的网站")
                 .action(clap::ArgAction::SetTrue),
         );
+    
+    #[cfg(feature = "debug")]
+    {
+        cli = cli.arg(
+        clap::Arg::new("debug")
+            .long("debug")
+            .help("设置debug模式，打印更多调试信息")
+            .required(false)
+            .action(clap::ArgAction::SetTrue),
+    )
+    }
 
     #[cfg(feature = "unstable")]
     {

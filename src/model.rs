@@ -46,6 +46,7 @@ pub struct CliArguments {
     pub proxy_str: Option<String>,
     pub download_path: Option<String>,
     pub speed: Option<f32>,
+    #[cfg(feature = "debug")]
     pub debug: bool,
     /// 是否打印受支持的网站
     pub print_support: bool,
@@ -60,6 +61,7 @@ impl From<clap::ArgMatches> for CliArguments {
         let speed: Option<f32> = matches
             .get_one("speed")
             .map(|str: &String| str.parse::<f32>().unwrap());
+        #[cfg(feature = "debug")]
         let debug = matches.get_flag("debug");
         let print_support = matches.get_flag("support_web_site");
 
@@ -69,6 +71,7 @@ impl From<clap::ArgMatches> for CliArguments {
             proxy_str,
             download_path,
             speed,
+            #[cfg(feature = "debug")]
             debug,
             print_support,
         }
