@@ -1,4 +1,4 @@
-# 69shuba-download
+# shuba-download
 [![Rust](https://github.com/ChengCY-2254/shuba/actions/workflows/rust.yml/badge.svg)](https://github.com/ChengCY-2254/shuba/actions/workflows/rust.yml)
 
 注意，中国大陆无法连接到69shuba请自行使用魔法。
@@ -57,6 +57,7 @@
 ## 支持的网站
 - [x] [69书吧](https://69shuba.cx/)
 - [x] [第二书包网](https://www.keryo.net/)
+- [ ] [顶点小说网](https://www.ddxs.com)
 
 ## 条件编译
 如果只需要该下载器的某一功能，那么在编译的过程中指定你所需要的功能就好。

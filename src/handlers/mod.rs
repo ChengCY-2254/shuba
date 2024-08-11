@@ -2,6 +2,8 @@ mod shuba;
 
 mod keryo;
 
+mod ddxs;
+
 
 
 #[cfg(feature = "shuba")]

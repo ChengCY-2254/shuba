@@ -1,4 +1,7 @@
+
 #[cfg(feature = "shuba")]
-mod shuba;
+pub mod shuba;
 #[cfg(feature = "keryo")]
-mod keryo;
+pub mod keryo;
+#[cfg(feature = "ddxs")]
+pub mod ddxs;

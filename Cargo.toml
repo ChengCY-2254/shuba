@@ -29,12 +29,16 @@ panic = 'abort'
 web-driver = ["fantoccini"]
 request = ["reqwest"]
 # 网站支持，可单独编译
+#69书吧
 shuba = ["web-driver"]
+#第二书包网不知道盗了几版
 keryo = ["chinese-number", "web-driver"]
+#顶点小说网
+ddxs = ["web-driver"]
 # 暂时不想管理的代码
 unstable = []
 
-full = ["shuba", "keryo"]
+full = ["shuba", "keryo", "ddxs"]
 debug = ["full", "env_logger"]
 
 [build-dependencies]

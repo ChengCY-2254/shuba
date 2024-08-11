@@ -4,50 +4,48 @@ use fantoccini::elements::Element;
 use log::error;
 use std::error::Error;
 
-impl Directory {
-    pub async fn parse_with_keryo(
-        driver: &Driver,
-    ) -> Result<Directory, Box<dyn std::error::Error>> {
-        //展开目录
-        driver.find(By::XPath("/html/body/div[4]/div[5]/div")).await?.click().await?;
-        let dd_list = driver
-            .find_all(By::XPath("/html/body/div[4]/div[4]/dl/dd"))
-            .await?;
-        let book_name = driver
-            .find(By::XPath("/html/body/div[4]/div[1]/div/div/div[2]/h1"))
-            .await?
-            .text()
-            .await?;
-        let mut list = vec![];
-        parse_inner_data(dd_list, &mut list).await?;
+pub async fn parse_with_keryo_dir(driver: &Driver) -> Result<Directory, Box<dyn std::error::Error>> {
+    //展开目录
+    driver
+        .find(By::XPath("/html/body/div[4]/div[5]/div"))
+        .await?
+        .click()
+        .await?;
+    let dd_list = driver
+        .find_all(By::XPath("/html/body/div[4]/div[4]/dl/dd"))
+        .await?;
+    let book_name = driver
+        .find(By::XPath("/html/body/div[4]/div[1]/div/div/div[2]/h1"))
+        .await?
+        .text()
+        .await?;
+    let mut list = vec![];
+    parse_inner_data(dd_list, &mut list).await?;
 
-        Ok(Directory {
-            book_name,
-            inner_data: list,
-        })
-    }
+    Ok(Directory {
+        book_name,
+        inner_data: list,
+    })
 }
 
-impl Chapter {
-    pub async fn parse_with_keryo(driver: &Driver) -> Result<Chapter, Box<dyn std::error::Error>> {
-        let content_text = driver.find(By::Id("booktxt")).await?.text().await?;
-        let chapter_title = driver
-            .find(By::XPath("/html/body/div[4]/div[1]/div[2]/h1"))
-            .await?
-            .text()
-            .await?;
-        //移除第一行和最后一行
-        let content_text = content_text
-            .lines()
-            .skip(1)
-            .take(content_text.lines().count() - 2)
-            .collect::<Vec<&str>>()
-            .join("\n");
-        Ok(Chapter {
-            chapters_name: chapter_title,
-            chapters_content: content_text,
-        })
-    }
+pub async fn parse_with_keryo_chapter(driver: &Driver) -> Result<Chapter, Box<dyn std::error::Error>> {
+    let content_text = driver.find(By::Id("booktxt")).await?.text().await?;
+    let chapter_title = driver
+        .find(By::XPath("/html/body/div[4]/div[1]/div[2]/h1"))
+        .await?
+        .text()
+        .await?;
+    //移除第一行和最后一行
+    let content_text = content_text
+        .lines()
+        .skip(1)
+        .take(content_text.lines().count() - 2)
+        .collect::<Vec<&str>>()
+        .join("\n");
+    Ok(Chapter {
+        chapters_name: chapter_title,
+        chapters_content: content_text,
+    })
 }
 
 /// 将元素转化成链接对
@@ -56,7 +54,7 @@ async fn parse_inner_data(
     ret: &mut Vec<ChapterLink>,
 ) -> Result<(), Box<dyn Error>> {
     // println!("dd len {}", dd_list.len());
-    for (i,dd) in dd_list.iter().enumerate() {
+    for (i, dd) in dd_list.iter().enumerate() {
         let class_name = dd.attr("class").await?;
         if let Some(class_name) = class_name {
             if class_name == "col-sm-4" {
@@ -77,7 +75,7 @@ async fn parse_inner_data(
                         let link = ChapterLink {
                             href,
                             title: chapter_name.clone(),
-                            id: i+1,
+                            id: i + 1,
                         };
                         ret.push(link);
                         error!(

@@ -14,6 +14,8 @@ pub struct Chapter {
 /// Book Info
 /// https://69shuba.cx/book/9958171.htm
 #[derive(Debug, Builder, PartialEq, Eq)]
+#[deprecated(note = "暂时无用")]
+#[cfg(feature = "unstable")]
 pub struct Book {
     pub book_name: String,
     pub author: String,
@@ -52,7 +54,7 @@ pub struct CliArguments {
 impl From<clap::ArgMatches> for CliArguments {
     fn from(matches: clap::ArgMatches) -> Self {
         let address = matches.get_one::<String>("address").unwrap().clone();
-        let url = matches.get_one::<String>("url").clone().map(String::from);
+        let url = matches.get_one::<String>("url").map(String::from);
         let proxy_str: Option<String> = matches.get_one::<String>("proxy_address").cloned();
         let download_path: Option<String> = matches.get_one("download_path").cloned();
         let speed: Option<f32> = matches

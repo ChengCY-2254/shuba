@@ -17,7 +17,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = cli::cli().get_matches();
 
     let arguments = CliArguments::from(matches);
-
+    
+    #[cfg(feature = "env_logger")]
     if arguments.debug {
         unsafe {
             std::env::set_var("RUST_LOG", "debug");
@@ -27,6 +28,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if arguments.print_support {
         log::info!("查看受支持的网站");
         let handle_list = handler::Handlers::values();
+        if handle_list.is_empty() {
+            println!("什么都没有(O_o)??");
+            std::process::exit(0);
+        }
         handle_list
             .iter()
             .for_each(|web_site_name| println!("{web_site_name}"));

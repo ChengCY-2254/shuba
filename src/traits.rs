@@ -12,7 +12,7 @@ pub type By<'a> = fantoccini::Locator<'a>;
 /// 通过该trait下载内容
 /// 完成后将Driver返回以供下一次调用
 #[cfg(feature = "web-driver")]
-pub trait Download {
+pub trait Download: BookParse {
     /// 下载指定章节
     async fn download_chapter(
         &self,
@@ -30,9 +30,9 @@ pub trait Download {
         let file_name = format!("{}.txt", chapter.chapters_name);
         info!("创建文件{file_name}");
 
-        let mut f = std::fs::File::create(path.join(file_name)).unwrap();
+        let mut f = std::fs::File::create(path.join(&file_name)).unwrap();
         crate::utils::format::write_chapter_by_txt(chapter, &mut f)?;
-        info!("下载完成:{}", link);
+        info!("{} 下载完成", file_name);
         Ok(driver)
     }
     ///下载指定目录
@@ -53,8 +53,10 @@ pub trait Download {
         println!("开始解析");
         let dir = Self::parse_directory(&driver).await.unwrap();
         println!("解析完成，需要下载{}章", dir.inner_data.len());
-        let speed = crate::utils::seconds_to_millis(speed)
-            .inspect(|duration| println!("每章需要等待{}s", duration.as_secs_f32()));
+        let speed = crate::utils::seconds_to_millis(speed).inspect(|duration| {
+            println!("每章需要等待{}s", duration.as_secs_f32());
+            info!("每章需要等待{}s", duration.as_secs_f32())
+        });
         progress.start(dir.inner_data.len() as u64);
         progress.set_message("开始下载");
         let mut f = std::fs::File::create(path.join(format!("{}.txt", dir.book_name)))?;
@@ -79,14 +81,10 @@ pub trait Download {
                 tokio::time::sleep(*speed).await;
             }
         }
+        info!("全本下载结束");
         progress.finish_with_message("dene");
         Ok(driver)
     }
-    /// 默认跳到了指定页面，然后移交给解析器
-    async fn parse_chapter(driver: &Driver) -> Result<Chapter, Box<dyn std::error::Error>>;
-
-    /// 默认跳到了指定页面，然后移交给解析器
-    async fn parse_directory(driver: &Driver) -> Result<Directory, Box<dyn std::error::Error>>;
     /// 对应下载器所提供的一些提示信息
     fn website_tips() -> Option<String>;
 }
@@ -118,4 +116,15 @@ pub trait Run: Download {
         driver.close().await.ok();
         Ok(())
     }
+}
+
+pub trait BookParse {
+    /// 默认跳到了指定页面，才移交给解析器
+    #[cfg(feature = "web-driver")]
+    async fn parse_chapter(driver: &Driver) -> Result<Chapter, Box<dyn std::error::Error>>;
+
+    /// 默认跳到了指定页面，才移交给解析器
+    #[cfg(feature = "web-driver")]
+    async fn parse_directory(driver: &Driver) -> Result<Directory, Box<dyn std::error::Error>>;
+    //#[cfg(all(not(feature = "web-driver"),feature = "request"))]
 }
