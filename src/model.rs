@@ -7,8 +7,8 @@ use std::fmt::Formatter;
 /// https://69shuba.cx/txt/9958171/90560237
 #[derive(Debug, Builder, Clone)]
 pub struct Chapter {
-    pub chapters_name: String,
-    pub chapters_content: String,
+    pub chapter_name: String,
+    pub chapter_content: String,
 }
 
 /// Book Info
@@ -77,8 +77,8 @@ impl From<clap::ArgMatches> for CliArguments {
 
 impl std::fmt::Display for Chapter {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{}", self.chapters_name)?;
-        write!(f, "{}", self.chapters_content)?;
+        writeln!(f, "{}", self.chapter_name)?;
+        write!(f, "{}", self.chapter_content)?;
         write!(f, "\n\n")?;
         Ok(())
     }

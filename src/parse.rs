@@ -23,6 +23,10 @@ impl std::convert::TryFrom<&str> for DownloadMode {
         if let Some(mode) = is_keryo(url) {
             return Ok(mode);
         }
+        #[cfg(feature = "ddxs")]
+        if let Some(mode) = is_ddxs(value) {
+            return Ok(mode);
+        }
 
         Err("无法识别的下载模式")
     }
@@ -71,6 +75,25 @@ fn is_keryo(value: &str) -> Option<DownloadMode> {
     log::error!("链接不匹配，无法识别下载模式");
     None
 }
+#[cfg(feature = "ddxs")]
+fn is_ddxs(value: &str) -> Option<DownloadMode> {
+    if value.ends_with(".html") {
+        return Some(DownloadMode::Chapter {
+            url: value.to_string(),
+        });
+    } else if !value
+        .split('/')
+        .filter(|s| !s.is_empty())
+        .collect::<Vec<_>>()[2]
+        .is_empty()
+    {
+        return Some(DownloadMode::Directory {
+            url: value.to_string(),
+        });
+    }
+    log::error!("链接不匹配，不是顶点小说网的链接");
+    None
+}
 #[allow(clippy::unnecessary_unwrap)]
 pub fn parse_download_path(p: Option<String>) -> Box<std::path::Path> {
     return if p.is_none() {
@@ -89,7 +112,7 @@ pub fn parse_download_path(p: Option<String>) -> Box<std::path::Path> {
 mod tests {
     #[test]
     fn test_split() {
-        let url = "https://www.keryo.net/book_hnqjhl/ooimpn.html";
+        let url = "https://www.ddxs.com/mofashaonvcanting/";
         let _args = url.split('/').filter(|s| !s.is_empty()).collect::<Vec<_>>();
         // panic!("{:?}", _args)
     }

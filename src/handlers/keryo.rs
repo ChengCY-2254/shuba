@@ -3,6 +3,7 @@
 use std::error::Error;
 use crate::impls::keryo::{parse_with_keryo_chapter, parse_with_keryo_dir};
 use crate::model::{Chapter, Directory};
+use crate::run_impl;
 use crate::traits::{BookParse, Download, Driver};
 
 pub struct Keryo;
@@ -23,4 +24,5 @@ impl BookParse for Keryo {
     }
 }
 
-impl crate::traits::Run for Keryo {}
+// impl crate::traits::Run for Keryo {}
+run_impl!(Keryo);

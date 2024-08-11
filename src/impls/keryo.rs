@@ -43,8 +43,8 @@ pub async fn parse_with_keryo_chapter(driver: &Driver) -> Result<Chapter, Box<dy
         .collect::<Vec<&str>>()
         .join("\n");
     Ok(Chapter {
-        chapters_name: chapter_title,
-        chapters_content: content_text,
+        chapter_name: chapter_title,
+        chapter_content: content_text,
     })
 }
 

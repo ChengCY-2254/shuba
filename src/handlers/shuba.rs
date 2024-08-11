@@ -3,8 +3,9 @@
 use std::error::Error;
 
 use crate::model::{Chapter, Directory};
-use crate::traits::{BookParse, Download, Driver, Run};
+use crate::traits::{BookParse, Download, Driver};
 use crate::impls::shuba::{get_chapter_with_shuba,get_dir_with_shuba};
+use crate::run_impl;
 
 pub struct Shuba;
 
@@ -24,4 +25,4 @@ impl BookParse for Shuba {
     }
 }
 
-impl Run for Shuba {}
+run_impl!(Shuba);

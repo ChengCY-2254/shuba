@@ -50,11 +50,11 @@ pub async fn get_chapter_with_shuba(driver: &'_ Driver) -> Result<Chapter, Box<d
         {
             let text_block = text_block.first().expect("no text block found");
             let chapters_content = get_text_from_div(text_block).await?;
-            builder.chapters_content(chapters_content);
+            builder.chapter_content(chapters_content);
         }
         {
             let title = title.text().await?;
-            builder.chapters_name(title);
+            builder.chapter_name(title);
         }
     }
     Ok(builder.build().unwrap())

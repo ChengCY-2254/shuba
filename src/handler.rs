@@ -8,6 +8,8 @@ pub enum Handlers {
     Shuba(crate::handlers::Shuba),
     #[cfg(feature = "keryo")]
     Keryo(crate::handlers::Keryo),
+    #[cfg(feature = "ddxs")]
+    Ddxs(crate::handlers::Ddxs),
 }
 
 impl std::convert::TryFrom<&str> for Handlers {
@@ -23,6 +25,11 @@ impl std::convert::TryFrom<&str> for Handlers {
         if value.starts_with("https://www.keryo.net") {
             info!("选择解析器：keryo");
             return Ok(Handlers::Keryo(crate::handlers::Keryo));
+        }
+        #[cfg(feature = "ddxs")]
+        if value.starts_with("https://www.ddxs.com") {
+            info!("选择解析器：ddxs");
+            return Ok(Handlers::Ddxs(crate::handlers::Ddxs));
         }
         info!("未找到解析器");
         Err("未找到与域名对应的解析器")
@@ -51,6 +58,12 @@ impl Handlers {
             }
             #[cfg(feature = "keryo")]
             Handlers::Keryo(handle) => {
+                handle
+                    .run(address, download_path, proxy_str, mode, speed)
+                    .await
+            }
+            #[cfg(feature = "ddxs")]
+            Handlers::Ddxs(handle) => {
                 handle
                     .run(address, download_path, proxy_str, mode, speed)
                     .await

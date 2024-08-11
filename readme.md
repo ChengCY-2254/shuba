@@ -57,13 +57,14 @@
 ## 支持的网站
 - [x] [69书吧](https://69shuba.cx/)
 - [x] [第二书包网](https://www.keryo.net/)
-- [ ] [顶点小说网](https://www.ddxs.com)
+- [x] [顶点小说网](https://www.ddxs.com)
 
 ## 条件编译
 如果只需要该下载器的某一功能，那么在编译的过程中指定你所需要的功能就好。
 有以下features key
 - shuba
 - keryo
+- ddxs
 - full
 - debug
 
@@ -73,6 +74,7 @@
 
 - shuba 仅可抓取[69书吧](https://69shuba.cx/)的内容。
 - keryo 仅可抓取[第二书包网](https://www.keryo.net/)的内容。
+- ddxs 仅可抓取[顶点小说网](https://www.ddxs.com)的内容
 
 预定义版：
 

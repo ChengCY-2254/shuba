@@ -9,6 +9,8 @@ mod model;
 mod parse;
 mod traits;
 mod utils;
+// #[macro_use]
+mod macros;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

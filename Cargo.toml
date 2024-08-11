@@ -20,6 +20,7 @@ chinese-number = { version = "0.7.7", optional = true, features = [
     "chinese-to-number",
 ] }
 reqwest = { version = "0.12.5", optional = true }
+url = "2.5.2"
 [profile.release]
 lto = true
 codegen-units = 1

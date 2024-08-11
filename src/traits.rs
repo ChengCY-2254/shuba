@@ -27,7 +27,7 @@ pub trait Download: BookParse {
         info!("开始下载:{}", link);
         println!("正在下载:{}", link);
 
-        let file_name = format!("{}.txt", chapter.chapters_name);
+        let file_name = format!("{}.txt", chapter.chapter_name);
         info!("创建文件{file_name}");
 
         let mut f = std::fs::File::create(path.join(&file_name)).unwrap();
