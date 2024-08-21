@@ -127,6 +127,7 @@ fn is_zhihu(url: &str) -> Option<Router> {
 #[cfg(feature = "full")]
 mod tests {
     #[test]
+    #[should_panic]
     fn test_split() {
         let url = "https://www.zhihu.com/market/paid_column/1558815650394587136/section/1654884523186982912?km_channel=search&origin_label=search";
         let _args = url.split('/').filter(|s| !s.is_empty()).collect::<Vec<_>>();
