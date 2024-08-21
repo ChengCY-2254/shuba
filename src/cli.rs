@@ -83,17 +83,32 @@ pub fn cli() -> clap::Command {
                 .long("support")
                 .help("查看支持的网站")
                 .action(clap::ArgAction::SetTrue),
+        )
+        .arg(
+            clap::Arg::new("user-data-dir")
+                .required(false)
+                // 存入cookie
+                .help("指定一个文件，用于保存浏览器的登录状态，登录状态仅限一个浏览器，无法多开。")
+                .default_value("./cookies")
+                .long("cookie"),
+        )
+        .arg(
+            clap::Arg::new("pre-login")
+                .required(false)
+                .help("预登录网站")
+                .long("login")
+                .action(clap::ArgAction::SetTrue),
         );
-    
+
     #[cfg(feature = "debug")]
     {
         cli = cli.arg(
-        clap::Arg::new("debug")
-            .long("debug")
-            .help("设置debug模式，打印更多调试信息")
-            .required(false)
-            .action(clap::ArgAction::SetTrue),
-    )
+            clap::Arg::new("debug")
+                .long("debug")
+                .help("设置debug模式，打印更多调试信息")
+                .required(false)
+                .action(clap::ArgAction::SetTrue),
+        )
     }
 
     #[cfg(feature = "unstable")]

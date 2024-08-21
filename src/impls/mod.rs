@@ -5,3 +5,5 @@ pub mod shuba;
 pub mod keryo;
 #[cfg(feature = "ddxs")]
 pub mod ddxs;
+#[cfg(feature = "zhihu")]
+pub mod zhihu;

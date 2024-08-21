@@ -1,7 +1,11 @@
 #![allow(unused)]
-
+/*!
+    这个模块主要用于存储用于解析的数据模型
+ */
 use proc_macro_workshop::Builder;
-use std::fmt::Formatter;
+use std::borrow::Cow;
+use std::fmt::{Display, Formatter};
+use std::io::Write;
 
 ///Chapters Content and Name
 /// https://69shuba.cx/txt/9958171/90560237
@@ -40,6 +44,7 @@ pub struct ChapterLink {
     pub id: usize,
 }
 /// 用于存放解析后的参数
+#[derive(Clone)]
 pub struct CliArguments {
     pub address: String,
     pub url: Option<String>,
@@ -50,6 +55,10 @@ pub struct CliArguments {
     pub debug: bool,
     /// 是否打印受支持的网站
     pub print_support: bool,
+    /// 浏览器的登录状态存储地 存cookie
+    pub user_data_dir: Option<String>,
+    /// 预登录网站
+    pub pre_login:bool
 }
 
 impl From<clap::ArgMatches> for CliArguments {
@@ -64,6 +73,8 @@ impl From<clap::ArgMatches> for CliArguments {
         #[cfg(feature = "debug")]
         let debug = matches.get_flag("debug");
         let print_support = matches.get_flag("support_web_site");
+        let user_data_dir = matches.get_one::<String>("user-data-dir").map(String::from);
+        let pre_login=matches.get_flag("pre-login");
 
         CliArguments {
             address,
@@ -74,6 +85,8 @@ impl From<clap::ArgMatches> for CliArguments {
             #[cfg(feature = "debug")]
             debug,
             print_support,
+            user_data_dir,
+            pre_login
         }
     }
 }

@@ -1,10 +1,10 @@
 #![cfg(feature = "keryo")]
 
-use std::error::Error;
 use crate::impls::keryo::{parse_with_keryo_chapter, parse_with_keryo_dir};
 use crate::model::{Chapter, Directory};
+use crate::prelude::*;
 use crate::run_impl;
-use crate::traits::{BookParse, Download, Driver};
+use crate::traits::{BookParse, Download};
 
 pub struct Keryo;
 
@@ -15,14 +15,13 @@ impl Download for Keryo {
 }
 
 impl BookParse for Keryo {
-    async fn parse_chapter(driver: &Driver) -> Result<Chapter, Box<dyn Error>> {
+    async fn parse_chapter(driver: &Driver) -> Result<Chapter> {
         parse_with_keryo_chapter(driver).await
     }
 
-    async fn parse_directory(driver: &Driver) -> Result<Directory, Box<dyn Error>> {
+    async fn parse_directory(driver: &Driver) -> Result<Directory> {
         parse_with_keryo_dir(driver).await
     }
 }
 
-// impl crate::traits::Run for Keryo {}
 run_impl!(Keryo);

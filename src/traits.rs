@@ -1,13 +1,16 @@
 #![allow(dead_code, unused_imports)]
-use crate::model::{Chapter, Directory};
-use crate::parse::DownloadMode;
-use log::info;
-use std::path::Path;
 
-#[cfg(feature = "web-driver")]
-pub type Driver = fantoccini::Client;
-#[cfg(feature = "web-driver")]
-pub type By<'a> = fantoccini::Locator<'a>;
+use crate::model::{Chapter, Directory};
+use crate::prelude::*;
+use crate::router::Router;
+use log::info;
+use std::borrow::Cow;
+use std::ops::Deref;
+use std::path::Path;
+// #[cfg(feature = "web-driver")]
+// pub type Driver = fantoccini::Client;
+// #[cfg(feature = "web-driver")]
+// pub type By<'a> = fantoccini::Locator<'a>;
 
 /// 通过该trait下载内容
 /// 完成后将Driver返回以供下一次调用
@@ -19,7 +22,7 @@ pub trait Download: BookParse {
         driver: Box<Driver>,
         url: impl AsRef<str>,
         path: &Path,
-    ) -> Result<Box<Driver>, Box<dyn std::error::Error>> {
+    ) -> Result<Box<Driver>> {
         let link = url.as_ref();
         driver.goto(link).await.ok();
         let chapter = Self::parse_chapter(&driver).await.unwrap();
@@ -43,7 +46,7 @@ pub trait Download: BookParse {
         path: &Path,
         //下载速率，是否需要间隔多少秒
         speed: Option<f32>,
-    ) -> Result<Box<Driver>, Box<dyn std::error::Error>> {
+    ) -> Result<Box<Driver>> {
         let link = url.as_ref();
         let mut progress = crate::utils::default_progress();
         driver.goto(link).await.ok();
@@ -94,37 +97,75 @@ pub trait Run: Download {
     async fn run(
         &self,
         address: &str,
-        download_path: &std::path::Path,
+        download_path: &Path,
         proxy_str: Option<String>,
-        mode: crate::parse::DownloadMode,
+        router: Router,
         speed: Option<f32>,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+        user_data_dir: Option<String>,
+    ) -> Result<()> {
         let driver = Box::new(crate::parse::get_driver(address, proxy_str).await?);
         driver.set_window_size(1109, 797).await.ok();
-        let driver = match mode {
-            DownloadMode::Chapter { url: link } => {
+        //获取user_data_dir中存储的用户数据 cookie
+        let driver = match router {
+            Router::Chapter { url: link } => {
+                add_cookies(&user_data_dir, &driver, &link).await?;
                 info!("下载章节:{}", link);
                 self.download_chapter(driver, link, download_path).await?
             }
-            DownloadMode::Directory { url: link } => {
+            Router::Directory { url: link } => {
+                add_cookies(&user_data_dir, &driver, &link).await?;
                 info!("下载全本:{}", link);
                 self.download_directory(driver, link, download_path, speed)
                     .await?
             }
         };
+        if let Some(file) = user_data_dir {
+            //获取全cookie
+            let cookies = driver.get_all_cookies().await?;
+            info!("回写cookie");
+            crate::parse::cookie::write_cookies(file, cookies)?;
+        }
         info!("关闭浏览器");
         driver.close().await.ok();
         Ok(())
     }
+
+    
+}
+async fn add_cookies<S: AsRef<str>>(
+    user_data_dir: &Option<String>,
+    driver: &Driver,
+    url: S,
+) -> Result<()> {
+    if let Some(dir) = &user_data_dir {
+        info!("正在读取cookie");
+        driver.goto(url.as_ref()).await?;
+        let cookie_file = std::fs::read_to_string(dir)?;
+        let iter = cookie_file.split_inclusive('\n').map(|line| {
+            let Some(line) = line.strip_suffix('\n') else {
+                return Cow::Owned(line.to_string());
+            };
+            let Some(line) = line.strip_suffix('\r') else {
+                return Cow::Owned(line.to_string());
+            };
+            Cow::Owned(line.to_string())
+        });
+        let cookies = crate::parse::cookie::read_cookies(iter)?;
+        for cookie in cookies {
+            info!("正在添加 {} 的cookie", cookie.domain().unwrap());
+            driver.add_cookie(cookie).await.ok();
+        }
+    }
+    Ok(())
 }
 
 pub trait BookParse {
     /// 默认跳到了指定页面，才移交给解析器
     #[cfg(feature = "web-driver")]
-    async fn parse_chapter(driver: &Driver) -> Result<Chapter, Box<dyn std::error::Error>>;
+    async fn parse_chapter(driver: &Driver) -> Result<Chapter>;
 
     /// 默认跳到了指定页面，才移交给解析器
     #[cfg(feature = "web-driver")]
-    async fn parse_directory(driver: &Driver) -> Result<Directory, Box<dyn std::error::Error>>;
+    async fn parse_directory(driver: &Driver) -> Result<Directory>;
     //#[cfg(all(not(feature = "web-driver"),feature = "request"))]
 }

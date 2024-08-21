@@ -1,99 +1,8 @@
 #![allow(unused_imports)]
 #[cfg(feature = "web-driver")]
 use fantoccini::wd::Capabilities;
-use serde_json::json;
+use serde_json::{json, Value};
 
-#[derive(Debug, PartialEq, Eq, Clone)]
-///在这里添加更多的下载模式解析。
-pub enum DownloadMode {
-    Chapter { url: String },
-    Directory { url: String },
-}
-
-impl std::convert::TryFrom<&str> for DownloadMode {
-    type Error = &'static str;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        let url = value;
-        #[cfg(feature = "shuba")]
-        if let Some(mode) = is_shuba(url) {
-            return Ok(mode);
-        }
-        #[cfg(feature = "keryo")]
-        if let Some(mode) = is_keryo(url) {
-            return Ok(mode);
-        }
-        #[cfg(feature = "ddxs")]
-        if let Some(mode) = is_ddxs(value) {
-            return Ok(mode);
-        }
-
-        Err("无法识别的下载模式")
-    }
-}
-
-#[cfg(feature = "shuba")]
-fn is_shuba(value: &str) -> Option<DownloadMode> {
-    let argument_len = value
-        .split('/')
-        .filter(|s| !s.is_empty())
-        .collect::<Vec<_>>()
-        .len();
-
-    match argument_len {
-        //https://69shuba.cx/txt/9958171/90560237
-        5 => Some(DownloadMode::Chapter{
-            url:value.replace("book", "txt").to_string(),
-        })
-        ,
-        //https://69shuba.cx/book/9958171/
-        4 => Some(DownloadMode::Directory{
-            url:value.replace("txt", "book").replace(".htm", "").to_string(),
-        }),
-        _ => None,
-    }
-}
-#[cfg(feature = "keryo")]
-fn is_keryo(value: &str) -> Option<DownloadMode> {
-    let args = value
-        .split('/')
-        .filter(|s| !s.is_empty())
-        .collect::<Vec<_>>();
-    if let Some(path) = args.get(2) {
-        return if path.starts_with("book") {
-            //https://www.keryo.net/book_hnqjhl/ooimpn.html
-            Some(DownloadMode::Chapter {
-                url: value.to_string(),
-            })
-        } else {
-            //https://www.keryo.net/xs_hnqjhl/
-            Some(DownloadMode::Directory {
-                url: value.to_string(),
-            })
-        };
-    }
-    log::error!("链接不匹配，无法识别下载模式");
-    None
-}
-#[cfg(feature = "ddxs")]
-fn is_ddxs(value: &str) -> Option<DownloadMode> {
-    if value.ends_with(".html") {
-        return Some(DownloadMode::Chapter {
-            url: value.to_string(),
-        });
-    } else if !value
-        .split('/')
-        .filter(|s| !s.is_empty())
-        .collect::<Vec<_>>()[2]
-        .is_empty()
-    {
-        return Some(DownloadMode::Directory {
-            url: value.to_string(),
-        });
-    }
-    log::error!("链接不匹配，不是顶点小说网的链接");
-    None
-}
 #[allow(clippy::unnecessary_unwrap)]
 pub fn parse_download_path(p: Option<String>) -> Box<std::path::Path> {
     return if p.is_none() {
@@ -107,16 +16,7 @@ pub fn parse_download_path(p: Option<String>) -> Box<std::path::Path> {
             .into_boxed_path()
     };
 }
-#[cfg(test)]
-#[cfg(feature = "full")]
-mod tests {
-    #[test]
-    fn test_split() {
-        let url = "https://www.ddxs.com/mofashaonvcanting/";
-        let _args = url.split('/').filter(|s| !s.is_empty()).collect::<Vec<_>>();
-        // panic!("{:?}", _args)
-    }
-}
+
 
 ///解析代理字符串
 /// export https_proxy=http://127.0.0.1:8888;export http_proxy=http://127.0.0.1:8888;export all_proxy=socks5://127.0.0.1:8889
@@ -142,17 +42,28 @@ fn parse_proxy_caps(
     }
     Ok(())
 }
+
+// fn parse_user_data_dir(
+//     caps: &mut Capabilities,
+//     user_data_dir: Option<String>,
+// ) -> Result<(), &'static str> {
+//     if let Some(user_data_dir) = user_data_dir {
+//         caps.insert("user-data-dir".to_owned(), Value::String(user_data_dir));
+//     }
+//     Ok(())
+// }
 #[cfg(feature = "web-driver")]
 #[inline]
-pub async fn get_driver(
-    address: &str,
+pub async fn get_driver<S:AsRef<str>>(
+    address: S,
     proxy_str: Option<String>,
 ) -> Result<fantoccini::Client, Box<dyn std::error::Error>> {
     let mut caps = Capabilities::new();
     parse_proxy_caps(&mut caps, proxy_str)?;
+    // parse_user_data_dir(&mut caps, user_data_dir)?;
     fantoccini::ClientBuilder::native()
         .capabilities(caps)
-        .connect(address)
+        .connect(address.as_ref())
         .await
         .map_err(|e| format!("连接到WebDriver出现错误，请检查参数是否正确 {}", e).into())
 }
@@ -206,5 +117,49 @@ mod format {
         fn default() -> Self {
             Self::Txt
         }
+    }
+}
+
+pub mod cookie {
+    #![allow(clippy::enum_variant_names)]
+    use std::borrow::Cow;
+    use std::io::Write;
+    use std::sync::Arc;
+
+    /// 从路径中的文件读取cookie
+    /// 一行一个cookie，就地反序列化并将其返回
+    #[cfg(feature = "fantoccini")]
+    pub fn read_cookies<'a, R: Iterator<Item = Cow<'a ,str>>>(
+        cookies_reader: R,
+    ) -> Result<Vec<fantoccini::cookies::Cookie<'a>>, Error> {
+        let mut cookies = vec![];
+        for cookie in cookies_reader {
+            let cookie = fantoccini::cookies::Cookie::parse(cookie)?;
+            cookies.push(cookie);
+        }
+        Ok(cookies)
+    }
+    /// 写入cookie，一行一个
+    #[cfg(feature = "fantoccini")]
+    pub fn write_cookies<P: AsRef<std::path::Path>>(
+        path: P,
+        cookies: Vec<fantoccini::cookies::Cookie>,
+    ) -> Result<(), std::io::Error> {
+        let mut f = std::fs::File::create(path)?;
+        for cookie in cookies {
+            let cookie = cookie.encoded().to_string();
+            write!(&mut f, "{}", cookie)?;
+            writeln!(f)?;
+        }
+        Ok(())
+    }
+    #[derive(thiserror::Error, Debug)]
+    pub enum Error {
+        #[error("get a io error for parse cookies {0}")]
+        IoError(#[from] std::io::Error),
+        #[error("parse cookie error {0}")]
+        CookieParseError(#[from] fantoccini::cookies::ParseError),
+        // #[error("read {0} get a error, because not a dir")]
+        // ReadCookieError(String)
     }
 }

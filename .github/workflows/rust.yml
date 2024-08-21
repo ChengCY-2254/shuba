@@ -31,7 +31,7 @@ jobs:
     - name: Run tests
       run: cargo test --verbose --features full
     - name: Build
-      run: cargo build --verbose --release --features full
+      run: cargo build --verbose --release --features release
     - name: 'Upload build target'
       uses: actions/upload-artifact@v4
       with:

@@ -2,6 +2,7 @@
 name = "shuba"
 version = "0.2.2"
 edition = "2021"
+homepage = "https://github.com/ChengCY-2254/shuba"
 
 [dependencies]
 tokio = { version = "1.39.1", features = ["rt", "macros"] }
@@ -21,6 +22,9 @@ chinese-number = { version = "0.7.7", optional = true, features = [
 ] }
 reqwest = { version = "0.12.5", optional = true }
 url = "2.5.2"
+thiserror = "1.0.63"
+regex = { version = "1.10.6",optional = true }
+lazy_static = { version = "1.5.0",optional = true }
 [profile.release]
 lto = true
 codegen-units = 1
@@ -38,9 +42,17 @@ keryo = ["chinese-number", "web-driver"]
 ddxs = ["web-driver"]
 # 暂时不想管理的代码
 unstable = []
+# 知乎
+zhihu = ["web-driver","regex","lazy_static"]
 
-full = ["shuba", "keryo", "ddxs"]
+full = ["shuba", "keryo", "ddxs","zhihu"]
+
+release = ["shuba", "keryo", "ddxs"]
+
 debug = ["full", "env_logger"]
 
 [build-dependencies]
 chrono = "0.4.38"
+
+[patch.crates-io]
+fantoccini = { git = "https://github.com/ChengCY-2254/fantoccini.git" }

@@ -1,7 +1,7 @@
 use crate::model::{Chapter, ChapterLink, Directory};
-use crate::traits::{By, Driver};
+use crate::prelude::*;
 
-pub async fn get_dirs(driver: &Driver) -> Result<Directory, Box<dyn std::error::Error>> {
+pub async fn get_dirs(driver: &Driver) -> Result<Directory> {
     let tbody = driver
         .find_all(By::XPath(
             "/html/body/div[3]/div[2]/dl/dd[3]/table[2]/tbody",
@@ -42,10 +42,8 @@ pub async fn get_dirs(driver: &Driver) -> Result<Directory, Box<dyn std::error::
         inner_data,
     })
 }
-pub async fn get_chapter(driver: &Driver) -> Result<Chapter, Box<dyn std::error::Error>> {
-    let content_dd = driver
-        .find(By::Id("contents"))
-        .await?;
+pub async fn get_chapter(driver: &Driver) -> Result<Chapter> {
+    let content_dd = driver.find(By::Id("contents")).await?;
     let h1 = driver
         .find(By::Css("#amain > dl > dd:nth-child(2) > h1"))
         .await?;
@@ -54,6 +52,6 @@ pub async fn get_chapter(driver: &Driver) -> Result<Chapter, Box<dyn std::error:
 
     Ok(Chapter {
         chapter_content,
-        chapter_name
+        chapter_name,
     })
 }

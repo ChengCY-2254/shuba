@@ -1,43 +1,9 @@
-use crate::model::{ Chapter, ChapterLink, Directory};
-use crate::traits::{By, Driver};
-use std::error::Error;
 use tokio::join;
 
-// pub async fn get_book_with_shuba(driver: &'_ Driver) -> Result<Book, Box<dyn Error>> {
-//     let mut res = crate::model::Book::builder();
-//     let meta_elements = driver
-//         .find_all(By::Css("head > meta"))
-//         .await
-//         .map_err(|e| format!("Failed find meta elements : {}", e))?;
-//     let words_count = driver
-//         .find(By::XPath("/html/body/div[3]/div/div/ul/li[2]"))
-//         .await
-//         .map_err(|e| format!("Failed find words count : {}", e))?;
-// 
-//     for meta in meta_elements.iter() {
-//         match meta.attr("content").await?.unwrap_or_default().as_str() {
-//             "og:novel:book_name" => {
-//                 res.book_name(meta.attr("content").await?.unwrap());
-//             }
-//             "og:novel:author" => {
-//                 res.author(meta.attr("content").await?.unwrap());
-//             }
-//             "og:novel:update_time" => {
-//                 res.update_time(meta.attr("content").await?.unwrap());
-//             }
-//             "og:novel:latest_chapter_name" => {
-//                 res.latest_chapter_link(meta.attr("content").await?.unwrap());
-//             }
-//             _ => continue,
-//         }
-//     }
-//     let words_count = words_count.text().await;
-//     res.chapters_len(words_count.unwrap_or_default().parse().unwrap_or_default());
-// 
-//     res.build()
-// }
+use crate::model::{Chapter, ChapterLink, Directory};
+use crate::prelude::*;
 
-pub async fn get_chapter_with_shuba(driver: &'_ Driver) -> Result<Chapter, Box<dyn Error>> {
+pub async fn get_chapter_with_shuba(driver: &'_ Driver) -> Result<Chapter> {
     let mut builder = crate::model::Chapter::builder();
     let script = driver.find_all(By::XPath("/html/head/script[2]"));
     let title = driver.find(By::XPath("/html/body/div[2]/div[1]/div[3]/h1"));
@@ -61,7 +27,7 @@ pub async fn get_chapter_with_shuba(driver: &'_ Driver) -> Result<Chapter, Box<d
 }
 
 /// https://github.com/ChengCY-2254/shuba/issues/5
-async fn get_text_from_div(div: &fantoccini::elements::Element) -> Result<String, Box<dyn Error>> {
+async fn get_text_from_div(div: &fantoccini::elements::Element) -> Result<String> {
     div.text()
         .await
         .map(|s| {
@@ -78,7 +44,7 @@ async fn get_text_from_div(div: &fantoccini::elements::Element) -> Result<String
         .map_err(|e| format!("get text from div error:{}", e).into())
 }
 
-pub async fn get_dir_with_shuba(driver: &'_ Driver) -> Result<Directory, Box<dyn Error>> {
+pub async fn get_dir_with_shuba(driver: &'_ Driver) -> Result<Directory> {
     let ul = driver
         .find_all(By::XPath("/html/body/div[3]/div/div[2]/ul/li"))
         .await
@@ -106,7 +72,7 @@ pub async fn get_dir_with_shuba(driver: &'_ Driver) -> Result<Directory, Box<dyn
     })
 }
 
-async fn parse_li(li: fantoccini::elements::Element) -> Result<ChapterLink, Box<dyn Error>> {
+async fn parse_li(li: fantoccini::elements::Element) -> Result<ChapterLink> {
     let id: usize = li
         .attr("data-num")
         .await?

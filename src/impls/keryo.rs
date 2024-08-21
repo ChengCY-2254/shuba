@@ -1,10 +1,11 @@
-use crate::model::{Chapter, ChapterLink, Directory};
-use crate::traits::{By, Driver};
+
 use fantoccini::elements::Element;
 use log::error;
-use std::error::Error;
 
-pub async fn parse_with_keryo_dir(driver: &Driver) -> Result<Directory, Box<dyn std::error::Error>> {
+use crate::model::{Chapter, ChapterLink, Directory};
+use crate::prelude::*;
+
+pub async fn parse_with_keryo_dir(driver: &Driver) -> Result<Directory> {
     //展开目录
     driver
         .find(By::XPath("/html/body/div[4]/div[5]/div"))
@@ -28,7 +29,7 @@ pub async fn parse_with_keryo_dir(driver: &Driver) -> Result<Directory, Box<dyn 
     })
 }
 
-pub async fn parse_with_keryo_chapter(driver: &Driver) -> Result<Chapter, Box<dyn std::error::Error>> {
+pub async fn parse_with_keryo_chapter(driver: &Driver) -> Result<Chapter> {
     let content_text = driver.find(By::Id("booktxt")).await?.text().await?;
     let chapter_title = driver
         .find(By::XPath("/html/body/div[4]/div[1]/div[2]/h1"))
@@ -49,10 +50,7 @@ pub async fn parse_with_keryo_chapter(driver: &Driver) -> Result<Chapter, Box<dy
 }
 
 /// 将元素转化成链接对
-async fn parse_inner_data(
-    dd_list: Vec<Element>,
-    ret: &mut Vec<ChapterLink>,
-) -> Result<(), Box<dyn Error>> {
+async fn parse_inner_data(dd_list: Vec<Element>, ret: &mut Vec<ChapterLink>) -> Result<()> {
     // println!("dd len {}", dd_list.len());
     for (i, dd) in dd_list.iter().enumerate() {
         let class_name = dd.attr("class").await?;
