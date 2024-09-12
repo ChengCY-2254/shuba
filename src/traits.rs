@@ -7,10 +7,6 @@ use log::info;
 use std::borrow::Cow;
 use std::ops::Deref;
 use std::path::Path;
-// #[cfg(feature = "web-driver")]
-// pub type Driver = fantoccini::Client;
-// #[cfg(feature = "web-driver")]
-// pub type By<'a> = fantoccini::Locator<'a>;
 
 /// 通过该trait下载内容
 /// 完成后将Driver返回以供下一次调用
@@ -34,7 +30,7 @@ pub trait Download: BookParse {
         info!("创建文件{file_name}");
 
         let mut f = std::fs::File::create(path.join(&file_name)).unwrap();
-        crate::utils::format::write_chapter_by_txt(chapter, &mut f)?;
+        crate::utils::format::write_chapter_by_txt(chapter, &mut f).unwrap();
         info!("{} 下载完成", file_name);
         Ok(driver)
     }
@@ -62,7 +58,12 @@ pub trait Download: BookParse {
         });
         progress.start(dir.inner_data.len() as u64);
         progress.set_message("开始下载");
-        let mut f = std::fs::File::create(path.join(format!("{}.txt", dir.book_name)))?;
+
+        let mut f = {
+            let path = path.join(format!("{}.txt", dir.book_name));
+            info!("创建文件 {}", path.display());
+            std::fs::File::create(path).unwrap()
+        };
 
         for chapters_link in dir.inner_data {
             let title = chapters_link.title;
@@ -76,7 +77,7 @@ pub trait Download: BookParse {
 
             let cache = chapter.to_string();
             info!("写入文件:{},长度为{}", title, cache.len());
-            f.write_all(cache.as_bytes())?;
+            f.write_all(cache.as_bytes()).unwrap();
             drop(chapter);
             progress.inc(1);
             //是否等待
@@ -101,59 +102,60 @@ pub trait Run: Download {
         proxy_str: Option<String>,
         router: Router,
         speed: Option<f32>,
-        user_data_dir: Option<String>,
+        user_data_file: Option<String>,
     ) -> Result<()> {
         let driver = Box::new(crate::parse::get_driver(address, proxy_str).await?);
         driver.set_window_size(1109, 797).await.ok();
         //获取user_data_dir中存储的用户数据 cookie
         let driver = match router {
             Router::Chapter { url: link } => {
-                add_cookies(&user_data_dir, &driver, &link).await?;
+                add_cookies(&user_data_file, &driver, &link).await?;
                 info!("下载章节:{}", link);
                 self.download_chapter(driver, link, download_path).await?
             }
             Router::Directory { url: link } => {
-                add_cookies(&user_data_dir, &driver, &link).await?;
+                add_cookies(&user_data_file, &driver, &link).await?;
                 info!("下载全本:{}", link);
                 self.download_directory(driver, link, download_path, speed)
                     .await?
             }
         };
-        if let Some(file) = user_data_dir {
-            //获取全cookie
-            let cookies = driver.get_all_cookies().await?;
-            info!("回写cookie");
-            crate::parse::cookie::write_cookies(file, cookies)?;
-        }
+        // if let Some(file) = user_data_dir {
+        //     //获取全cookie
+        //     let cookies = driver.get_all_cookies().await?;
+        //     info!("回写cookie");
+        //     crate::parse::cookie::write_cookies(file, cookies)?;
+        // }
         info!("关闭浏览器");
         driver.close().await.ok();
         Ok(())
     }
-
-    
 }
 async fn add_cookies<S: AsRef<str>>(
-    user_data_dir: &Option<String>,
+    user_data_file: &Option<String>,
     driver: &Driver,
     url: S,
 ) -> Result<()> {
-    if let Some(dir) = &user_data_dir {
+    if let Some(file) = &user_data_file {
         info!("正在读取cookie");
         driver.goto(url.as_ref()).await?;
-        let cookie_file = std::fs::read_to_string(dir)?;
-        let iter = cookie_file.split_inclusive('\n').map(|line| {
-            let Some(line) = line.strip_suffix('\n') else {
-                return Cow::Owned(line.to_string());
-            };
-            let Some(line) = line.strip_suffix('\r') else {
-                return Cow::Owned(line.to_string());
-            };
-            Cow::Owned(line.to_string())
-        });
-        let cookies = crate::parse::cookie::read_cookies(iter)?;
-        for cookie in cookies {
-            info!("正在添加 {} 的cookie", cookie.domain().unwrap());
-            driver.add_cookie(cookie).await.ok();
+
+        if std::path::Path::new(file).exists() {
+            let cookie_file = std::fs::read_to_string(file)?;
+            let iter = cookie_file.split_inclusive('\n').map(|line| {
+                let Some(line) = line.strip_suffix('\n') else {
+                    return Cow::Owned(line.to_string());
+                };
+                let Some(line) = line.strip_suffix('\r') else {
+                    return Cow::Owned(line.to_string());
+                };
+                Cow::Owned(line.to_string())
+            });
+            let cookies = crate::parse::cookie::read_cookies(iter)?;
+            for cookie in cookies {
+                info!("正在添加 {} 的cookie", cookie.domain().unwrap());
+                driver.add_cookie(cookie).await.ok();
+            }
         }
     }
     Ok(())

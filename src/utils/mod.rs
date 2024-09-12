@@ -1,12 +1,15 @@
 #![allow(unused_imports)]
 
 mod progress;
+#[cfg(feature = "tesseract")]
+mod tesseract;
 
 pub mod text;
 
 pub mod format;
 
 pub use progress::Progress;
+// pub use text::lines;
 use progress::DEFAULT_TEMPLATE;
 
 pub fn default_progress() -> Progress {

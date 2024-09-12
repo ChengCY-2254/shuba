@@ -53,7 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         return pre_login_logic(&arguments).await;
     }
 
-    return download_logic(&arguments).await;
+    download_logic(&arguments).await
 }
 ///小说下载逻辑
 async fn download_logic(arguments: &CliArguments) -> Result<(), Box<dyn Error>> {
@@ -63,6 +63,7 @@ async fn download_logic(arguments: &CliArguments) -> Result<(), Box<dyn Error>> 
 
     let downloads = parse::parse_download_path(arguments.download_path.clone());
     if !downloads.exists() {
+        info!("创建路径 {}",downloads.display());
         std::fs::create_dir_all(&downloads)?;
     }
     //统计运行时间

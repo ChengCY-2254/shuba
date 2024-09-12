@@ -1,6 +1,10 @@
 #[cfg(feature = "chinese-number")]
 use chinese_number::{from_chinese_to_f32_high, from_chinese_to_usize_ten_thousand};
+use std::borrow::Cow;
+use std::iter::Map;
 use std::rc::Rc;
+use std::str::SplitInclusive;
+
 #[allow(unused)]
 /// 在文字中寻找数字并返回,只查找整数。
 pub fn find_number(text: &str) -> Option<usize> {
@@ -82,6 +86,22 @@ pub fn get_chinese_number(text: &str) -> Option<String> {
     }
     None
 }
+
+///一个行阅读器
+// #[inline]
+// pub fn lines<'a, S: AsRef<str> + 'a>(
+//     s: S,
+// ) -> Map<SplitInclusive<'a, char>, fn(&'a str) -> Cow<'a, str>> {
+//     return s.as_ref().split_inclusive('\n').map(|line| {
+//         let Some(line) = line.strip_suffix('\n') else {
+//             return Cow::Owned(line.to_string());
+//         };
+//         let Some(line) = line.strip_suffix('\r') else {
+//             return Cow::Owned(line.to_string());
+//         };
+//         Cow::Owned(line.to_string())
+//     })
+// }
 
 #[cfg(test)]
 mod tests {

@@ -19,7 +19,8 @@ impl std::convert::TryFrom<&str> for Handlers {
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         #[cfg(feature = "shuba")]
-        if value.starts_with("https://69shuba.cx") {
+        //后缀日常切换，所以直接忽略后缀
+        if value.starts_with("https://69shu") {
             info!("选择解析器：69shuba");
             return Ok(Handlers::Shuba(crate::handlers::Shuba));
         }
@@ -55,32 +56,32 @@ impl Handlers {
         let address: &str = cli_arguments.address.as_str();
         let proxy_str = cli_arguments.proxy_str;
         let speed = cli_arguments.speed;
-        let user_data_dir = cli_arguments.user_data_dir;
+        let user_data_file = cli_arguments.user_data_dir;
         // let format = cli_arguments.format;
         //todo 用宏将这里简化一下运行
         match self {
             #[cfg(feature = "shuba")]
             Handlers::Shuba(handle) => {
                 handle
-                    .run(address, download_path, proxy_str, mode, speed,user_data_dir)
+                    .run(address, download_path, proxy_str, mode, speed, user_data_file)
                     .await
             }
             #[cfg(feature = "keryo")]
             Handlers::Keryo(handle) => {
                 handle
-                    .run(address, download_path, proxy_str, mode, speed,user_data_dir)
+                    .run(address, download_path, proxy_str, mode, speed, user_data_file)
                     .await
             }
             #[cfg(feature = "ddxs")]
             Handlers::Ddxs(handle) => {
                 handle
-                    .run(address, download_path, proxy_str, mode, speed,user_data_dir)
+                    .run(address, download_path, proxy_str, mode, speed, user_data_file)
                     .await
             }
             #[cfg(feature = "zhihu")]
             Handlers::Zhihu(handle)=>{
                 handle
-                    .run(address, download_path, proxy_str, mode, speed,user_data_dir)
+                    .run(address, download_path, proxy_str, mode, speed, user_data_file)
                     .await
             }
             _ => Err("未找到与域名对应的下载器".into()),

@@ -18,7 +18,7 @@ impl BookParse for Zhihu {
 
 impl crate::traits::Download for Zhihu {
     fn website_tips() -> Option<String> {
-        Some("知乎的速率开慢一点".to_string())
+        Some("B乎接口加密👍，要对字符集重映射".to_string())
     }
 }
 

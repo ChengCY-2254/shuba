@@ -5,7 +5,7 @@ use serde_json::{json, Value};
 
 #[allow(clippy::unnecessary_unwrap)]
 pub fn parse_download_path(p: Option<String>) -> Box<std::path::Path> {
-    return if p.is_none() {
+    if p.is_none() {
         std::env::current_dir()
             .unwrap()
             .join("downloads")
@@ -14,13 +14,14 @@ pub fn parse_download_path(p: Option<String>) -> Box<std::path::Path> {
         std::path::Path::new(&p.unwrap())
             .to_path_buf()
             .into_boxed_path()
-    };
+    }
 }
 
 
 ///解析代理字符串
 /// export https_proxy=http://127.0.0.1:8888;export http_proxy=http://127.0.0.1:8888;export all_proxy=socks5://127.0.0.1:8889
 #[cfg(feature = "web-driver")]
+#[inline]
 fn parse_proxy_caps(
     caps: &mut Capabilities,
     proxy_str: Option<String>,
@@ -43,15 +44,6 @@ fn parse_proxy_caps(
     Ok(())
 }
 
-// fn parse_user_data_dir(
-//     caps: &mut Capabilities,
-//     user_data_dir: Option<String>,
-// ) -> Result<(), &'static str> {
-//     if let Some(user_data_dir) = user_data_dir {
-//         caps.insert("user-data-dir".to_owned(), Value::String(user_data_dir));
-//     }
-//     Ok(())
-// }
 #[cfg(feature = "web-driver")]
 #[inline]
 pub async fn get_driver<S:AsRef<str>>(
@@ -67,64 +59,13 @@ pub async fn get_driver<S:AsRef<str>>(
         .await
         .map_err(|e| format!("连接到WebDriver出现错误，请检查参数是否正确 {}", e).into())
 }
-#[cfg(feature = "unstable")]
-mod format {
-    use clap::builder::PossibleValue;
-    #[derive(Debug, PartialEq, Eq, Clone)]
-    pub enum Format {
-        Txt,
-        Epub,
-    }
-
-    impl std::convert::TryFrom<&str> for Format {
-        type Error = &'static str;
-
-        fn try_from(value: &str) -> Result<Self, Self::Error> {
-            match value {
-                "txt" => Ok(Format::Txt),
-                "epub" => Ok(Format::Epub),
-                _ => Err("无法识别的格式"),
-            }
-        }
-    }
-
-    impl clap::ValueEnum for Format {
-        fn value_variants<'a>() -> &'a [Self] {
-            &[Format::Txt, Format::Epub]
-        }
-
-        fn to_possible_value(&self) -> Option<PossibleValue> {
-            match self {
-                Format::Txt => Some(PossibleValue::new("txt").help(".txt格式")),
-                Format::Epub => Some(PossibleValue::new("epub").help(".epub格式")),
-            }
-        }
-    }
-
-    impl std::str::FromStr for Format {
-        type Err = String;
-
-        fn from_str(s: &str) -> Result<Self, Self::Err> {
-            match s {
-                "txt" => Ok(Format::Txt),
-                "epub" => Ok(Format::Epub),
-                _ => Err("无法识别的格式".to_string()),
-            }
-        }
-    }
-
-    impl Default for Format {
-        fn default() -> Self {
-            Self::Txt
-        }
-    }
-}
 
 pub mod cookie {
     #![allow(clippy::enum_variant_names)]
     use std::borrow::Cow;
     use std::io::Write;
     use std::sync::Arc;
+    use fantoccini::cookies::ParseError;
 
     /// 从路径中的文件读取cookie
     /// 一行一个cookie，就地反序列化并将其返回
