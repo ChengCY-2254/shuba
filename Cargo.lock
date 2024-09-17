@@ -91,6 +91,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.88"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4e1496f8fb1fbf272686b8d37f523dab3e4a7443300055e74cdaa449f3114356"
+
+[[package]]
 name = "atomic-waker"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1465,6 +1471,7 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 name = "shuba"
 version = "0.2.2"
 dependencies = [
+ "anyhow",
  "chinese-number",
  "chrono",
  "clap",

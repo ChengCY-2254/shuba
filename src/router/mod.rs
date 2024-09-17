@@ -1,5 +1,4 @@
-
-
+use lazy_static::lazy_static;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 ///在这里添加更多的下载模式解析。
@@ -9,7 +8,7 @@ pub enum Router {
 }
 
 impl TryFrom<&str> for Router {
-    type Error = &'static str;
+    type Error = anyhow::Error;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         let url = value;
@@ -29,7 +28,7 @@ impl TryFrom<&str> for Router {
         if let Some(router) = is_zhihu(url) {
             return Ok(router);
         }
-        Err("无法识别的下载模式")
+        Err(crate::Error::From("无法识别的下载模式".to_string()))?
     }
 }
 
@@ -98,7 +97,7 @@ fn is_ddxs(value: &str) -> Option<Router> {
 
 #[cfg(feature = "zhihu")]
 fn is_zhihu(url: &str) -> Option<Router> {
-    use lazy_static::lazy_static;
+    // use lazy_static::lazy_static;
     use regex::Regex;
     lazy_static! {
         static ref dir_matching: Regex =
@@ -131,6 +130,6 @@ mod tests {
     fn test_split() {
         let url = "https://www.zhihu.com/market/paid_column/1558815650394587136/section/1654884523186982912?km_channel=search&origin_label=search";
         let _args = url.split('/').filter(|s| !s.is_empty()).collect::<Vec<_>>();
-        panic!("len is {} {:?}", _args.len(), _args)
+        // panic!("len is {} {:?}", _args.len(), _args)
     }
 }

@@ -1,6 +1,6 @@
-use log::info;
 use crate::model::{Chapter, ChapterLink, Directory};
 use crate::prelude::*;
+use log::info;
 
 pub async fn parse_dir(driver: &Driver) -> Result<Directory> {
     //这是一个button，用于展示更多章节，先按出来才能解析
@@ -15,15 +15,14 @@ pub async fn parse_dir(driver: &Driver) -> Result<Directory> {
         let script = format!(
             "document.getElementsByClassName(\"{}\")[0].click();",
             b.attr("class")
-                .await
-                .unwrap()
+                .await?
                 .unwrap()
                 .split(' ')
                 .rev()
                 .last()
                 .unwrap()
         );
-        info!("script {}",script);
+        info!("script {}", script);
         driver.execute(script.as_str(), vec![]).await.unwrap();
         // b.click().await?;
     };
@@ -40,7 +39,7 @@ pub async fn parse_dir(driver: &Driver) -> Result<Directory> {
         .text()
         .await?;
 
-    let url = driver.current_url().await.unwrap().to_string();
+    let url = driver.current_url().await?.to_string();
     let mut inner_data = vec![];
     // let chapter_name_selector = By::XPath("/div[1]/div[2]");
     for (i, item) in chapters.iter().enumerate() {
@@ -73,7 +72,9 @@ pub async fn parse_dir(driver: &Driver) -> Result<Directory> {
                 id: i,
             })
         } else {
-            return Err("未找到json对象，请检查规则是否正常".into());
+            return Err(crate::Error::ParseElement(
+                "未找到json对象，请检查规则是否正常".into(),
+            ))?;
         }
     }
 
@@ -93,5 +94,8 @@ pub async fn parse_chapter(driver: &Driver) -> Result<Chapter> {
     builder.chapter_name(title.text().await?);
     builder.chapter_content(content.text().await?);
 
-    builder.build()
+    builder
+        .build()
+        .map_err(|e| crate::Error::ParseElement(format!("解析chapter对象失败{}", e)))
+        .map_err(anyhow::Error::new)
 }

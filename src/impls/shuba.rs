@@ -4,7 +4,7 @@ use crate::model::{Chapter, ChapterLink, Directory};
 use crate::prelude::*;
 
 pub async fn get_chapter_with_shuba(driver: &'_ Driver) -> Result<Chapter> {
-    let mut builder = crate::model::Chapter::builder();
+    let mut builder = Chapter::builder();
     let script = driver.find_all(By::XPath("/html/head/script[2]"));
     let title = driver.find(By::XPath("/html/body/div[2]/div[1]/div[3]/h1"));
     let chapter_title = driver.find(By::XPath("/html/body/div[2]/div[1]/div[3]/h1"));
@@ -23,7 +23,10 @@ pub async fn get_chapter_with_shuba(driver: &'_ Driver) -> Result<Chapter> {
             builder.chapter_name(title);
         }
     }
-    Ok(builder.build().unwrap())
+    builder
+        .build()
+        .map_err(|e| crate::Error::ParseElement(format!("chapter get error {}", e)))
+        .map_err(anyhow::Error::new)
 }
 
 /// https://github.com/ChengCY-2254/shuba/issues/5
@@ -41,25 +44,26 @@ async fn get_text_from_div(div: &fantoccini::elements::Element) -> Result<String
                     acc
                 })
         })
-        .map_err(|e| format!("get text from div error:{}", e).into())
+        .map_err(|e| crate::Error::ParseElement(format!("get text from div error {}", e)))
+        .map_err(anyhow::Error::new)
 }
 
 pub async fn get_dir_with_shuba(driver: &'_ Driver) -> Result<Directory> {
     let ul = driver
         .find_all(By::XPath("/html/body/div[3]/div/div[2]/ul/li"))
         .await
-        .map_err(|e| format!("Failed to find li element : {}", e))?;
+        .map_err(|e| Error::ParseElement(format!("Failed to find li element : {}", e)))?;
     let book_name = driver
         .find(By::XPath("/html/body/div[3]/div/h3/div[1]/a[3]"))
         .await
-        .map_err(|e| format!("Failed to find book name : {}", e))?;
+        .map_err(|e| Error::ParseElement(format!("Failed to find book name : {}", e)))?;
     let book_name = book_name.text().await.unwrap_or_default();
     let mut inner_data = {
         let mut data = vec![];
         for li in ul {
             let li_link = parse_li(li)
                 .await
-                .map_err(|e| format!("Failed to parse li: {}", e))?;
+                .map_err(|e| Error::ParseElement(format!("Failed to parse li: {}", e)))?;
             data.push(li_link);
         }
         data

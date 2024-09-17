@@ -1,6 +1,7 @@
 use crate::model::CliArguments;
-use log::info;
 use crate::router::Router;
+use log::info;
+use crate::prelude::*;
 
 #[derive(proc_macro_workshop::Enums)]
 pub enum Handlers {
@@ -15,9 +16,9 @@ pub enum Handlers {
 }
 
 impl std::convert::TryFrom<&str> for Handlers {
-    type Error = &'static str;
+    type Error = anyhow::Error;
 
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
+    fn try_from(value: &str) -> Result<Self> {
         #[cfg(feature = "shuba")]
         //后缀日常切换，所以直接忽略后缀
         if value.starts_with("https://69shu") {
@@ -40,7 +41,7 @@ impl std::convert::TryFrom<&str> for Handlers {
             return Ok(Handlers::Zhihu(crate::handlers::Zhihu));
         }
         info!("未找到解析器");
-        Err("未找到与域名对应的解析器")
+        Err("未找到与域名对应的解析器").map_err(|e|crate::Error::From(e.to_string()))?
     }
 }
 
@@ -51,7 +52,7 @@ impl Handlers {
         cli_arguments: CliArguments,
         mode: Router,
         download_path: &std::path::Path,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    ) -> Result<()> {
         use crate::traits::Run;
         let address: &str = cli_arguments.address.as_str();
         let proxy_str = cli_arguments.proxy_str;
@@ -84,7 +85,43 @@ impl Handlers {
                     .run(address, download_path, proxy_str, mode, speed, user_data_file)
                     .await
             }
-            _ => Err("未找到与域名对应的下载器".into()),
+            _ => Err(crate::Error::Handler("未找到与域名对应的下载器".to_string()))?,
+        }
+    }
+}
+mod __private{
+    #![allow(unused)]
+    //! 文件配置读取，将url放置到外部定义，以免域名频繁变更
+    //! todo
+    use std::sync::LazyLock;
+
+    pub(crate) static ENV_FILE: LazyLock<Option<String>> = LazyLock::new(||{
+        let env_file = std::env::current_dir()
+             .map(|path|path.join(".env"))
+             .map(std::fs::read_to_string);
+        match env_file{
+            Ok(Ok(file))=>Some(file),
+            _=>None
+        }
+    });
+
+    fn get_url<'a>(_key:&'a str ,default_value:&'a str)->String{
+        match ENV_FILE.as_ref() {
+            None => {default_value.to_string()}
+            Some(file) => {
+                let _line_iter = file.lines();
+            // let a =    file
+            //         .lines()
+            //         .filter(|line| line.starts_with(key))
+            //         .map(|line|{
+            //             let mut iter =line.split('=');
+            //             let _ = iter.next();
+            //             iter.next()
+            //         })};
+
+            unimplemented!()
+            }
+
         }
     }
 }

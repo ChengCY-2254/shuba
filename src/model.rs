@@ -1,7 +1,5 @@
 #![allow(unused)]
-/*!
-    这个模块主要用于存储用于解析的数据模型
- */
+//!这个模块主要用于存储用于解析的数据模型
 use proc_macro_workshop::Builder;
 use std::borrow::Cow;
 use std::fmt::{Display, Formatter};

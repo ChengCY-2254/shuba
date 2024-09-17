@@ -21,7 +21,7 @@ pub trait Download: BookParse {
     ) -> Result<Box<Driver>> {
         let link = url.as_ref();
         driver.goto(link).await.ok();
-        let chapter = Self::parse_chapter(&driver).await.unwrap();
+        let chapter = Self::parse_chapter(&driver).await?;
 
         info!("开始下载:{}", link);
         println!("正在下载:{}", link);
@@ -29,8 +29,8 @@ pub trait Download: BookParse {
         let file_name = format!("{}.txt", chapter.chapter_name);
         info!("创建文件{file_name}");
 
-        let mut f = std::fs::File::create(path.join(&file_name)).unwrap();
-        crate::utils::format::write_chapter_by_txt(chapter, &mut f).unwrap();
+        let mut f = std::fs::File::create(path.join(&file_name))?;
+        crate::utils::format::write_chapter_by_txt(chapter, &mut f)?;
         info!("{} 下载完成", file_name);
         Ok(driver)
     }
@@ -50,7 +50,7 @@ pub trait Download: BookParse {
             println!("{help_msg}")
         }
         println!("开始解析");
-        let dir = Self::parse_directory(&driver).await.unwrap();
+        let dir = Self::parse_directory(&driver).await?;
         println!("解析完成，需要下载{}章", dir.inner_data.len());
         let speed = crate::utils::seconds_to_millis(speed).inspect(|duration| {
             println!("每章需要等待{}s", duration.as_secs_f32());
@@ -62,7 +62,7 @@ pub trait Download: BookParse {
         let mut f = {
             let path = path.join(format!("{}.txt", dir.book_name));
             info!("创建文件 {}", path.display());
-            std::fs::File::create(path).unwrap()
+            std::fs::File::create(path)?
         };
 
         for chapters_link in dir.inner_data {
@@ -73,11 +73,11 @@ pub trait Download: BookParse {
             use std::io::Write;
             progress.set_message(title.clone());
             info!("下载章节:{}", title);
-            let chapter = Self::parse_chapter(&driver).await.unwrap();
+            let chapter = Self::parse_chapter(&driver).await?;
 
             let cache = chapter.to_string();
             info!("写入文件:{},长度为{}", title, cache.len());
-            f.write_all(cache.as_bytes()).unwrap();
+            f.write_all(cache.as_bytes())?;
             drop(chapter);
             progress.inc(1);
             //是否等待
@@ -120,12 +120,6 @@ pub trait Run: Download {
                     .await?
             }
         };
-        // if let Some(file) = user_data_dir {
-        //     //获取全cookie
-        //     let cookies = driver.get_all_cookies().await?;
-        //     info!("回写cookie");
-        //     crate::parse::cookie::write_cookies(file, cookies)?;
-        // }
         info!("关闭浏览器");
         driver.close().await.ok();
         Ok(())
@@ -169,5 +163,4 @@ pub trait BookParse {
     /// 默认跳到了指定页面，才移交给解析器
     #[cfg(feature = "web-driver")]
     async fn parse_directory(driver: &Driver) -> Result<Directory>;
-    //#[cfg(all(not(feature = "web-driver"),feature = "request"))]
 }
