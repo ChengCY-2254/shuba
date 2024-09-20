@@ -13,6 +13,6 @@ pub enum Error{
     Handler(String),
     #[error("parse caps get an error ${0}")]
     ParseCaps(String),
-    #[error("parse html element get an error ${0}")]
-    ParseElement(String),
+    // #[error("parse html element get an error ${0}")]
+    // ParseElement(String),
 }

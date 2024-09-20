@@ -1,4 +1,3 @@
-use lazy_static::lazy_static;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 ///在这里添加更多的下载模式解析。
@@ -12,10 +11,6 @@ impl TryFrom<&str> for Router {
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         let url = value;
-        #[cfg(feature = "shuba")]
-        if let Some(router) = is_shuba(url) {
-            return Ok(router);
-        }
         #[cfg(feature = "keryo")]
         if let Some(router) = is_keryo(url) {
             return Ok(router);
@@ -24,35 +19,11 @@ impl TryFrom<&str> for Router {
         if let Some(router) = is_ddxs(url) {
             return Ok(router);
         }
-        #[cfg(feature = "zhihu")]
-        if let Some(router) = is_zhihu(url) {
-            return Ok(router);
-        }
         Err(crate::Error::From("无法识别的下载模式".to_string()))?
     }
 }
 
-#[cfg(feature = "shuba")]
-fn is_shuba(value: &str) -> Option<Router> {
-    let argument_len = value
-        .split('/')
-        .filter(|s| !s.is_empty())
-        .collect::<Vec<_>>()
-        .len();
 
-    match argument_len {
-        //https://69shuba.cx/txt/9958171/90560237
-        5 => Some(Router::Chapter{
-            url:value.replace("book", "txt").to_string(),
-        })
-        ,
-        //https://69shuba.cx/book/9958171/
-        4 => Some(Router::Directory{
-            url:value.replace("txt", "book").replace(".htm", "").to_string(),
-        }),
-        _ => None,
-    }
-}
 #[cfg(feature = "keryo")]
 fn is_keryo(value: &str) -> Option<Router> {
     let args = value
@@ -95,32 +66,6 @@ fn is_ddxs(value: &str) -> Option<Router> {
     None
 }
 
-#[cfg(feature = "zhihu")]
-fn is_zhihu(url: &str) -> Option<Router> {
-    // use lazy_static::lazy_static;
-    use regex::Regex;
-    lazy_static! {
-        static ref dir_matching: Regex =
-            Regex::new(r#"https://www.zhihu.com/xen/market/remix/paid_column/\d*"#).unwrap();
-        static ref chapter_mathing: Regex =
-            Regex::new(r#"https://www.zhihu.com/market/paid_column/\d*/section/\d*\?"#).unwrap();
-    }
-    //是目录
-    //https://www.zhihu.com/xen/market/remix/paid_column/1558815650394587136
-    //单章
-    //https://www.zhihu.com/market/paid_column/1558815650394587136/section/1654884523186982912?km_channel=search&origin_label=search
-    if dir_matching.is_match(url) {
-        return Some(Router::Directory {
-            url: url.to_owned(),
-        });
-    }
-    if chapter_mathing.is_match(url) {
-        return Some(Router::Chapter {
-            url: url.to_owned(),
-        });
-    }
-    None
-}
 
 #[cfg(test)]
 #[cfg(feature = "full")]
